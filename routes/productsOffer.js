@@ -5,6 +5,7 @@ const requireAuth = require('../middleware/requireAuth')
 // constroller functions
 const {
     getOfferProducts,
+    getOfferProduct,
     createProductOffer 
 } = require('../controllers/productOfferController')
 
@@ -15,8 +16,10 @@ const {
 
  // get  all offer products
  router.get('/', getOfferProducts)
- 
 
+ // get single product
+router.get('/:id',getOfferProduct)
+ 
  // upload products
  router.post('/', createProductOffer)
  

@@ -13,6 +13,23 @@ const getOfferProducts = async (req, res) => {
     
 }
 
+// get single Product offer
+const getOfferProduct = async (req, res) => {
+    const {id} = req.params
+      if(!mongoose.Types.ObjectId.isValid(id)){
+          return res.status(404).json({error:'No Such product'})
+      }
+  
+      const product = await ProdctOffer.findById(id)
+  
+      if(!product) {
+          return res.status(404).json({error: 'No such product'})
+      }
+  
+      res.status(200).json(product)
+  
+  }
+
 
 // create a new 
 const createProductOffer = async (req,res) => {
@@ -34,5 +51,6 @@ const createProductOffer = async (req,res) => {
 
 module.exports = {
     getOfferProducts,
+    getOfferProduct,
     createProductOffer
   }
