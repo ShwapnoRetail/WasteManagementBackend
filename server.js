@@ -10,11 +10,11 @@ const productOfferRoutes = require('./routes/productsOffer');
 
 //express app
 const app = express()
-app.use(cors());
 
 
 // middleware
-app.use(express.json())
+app.use(express.json({ limit: '10mb' }))
+app.use(cors());
 
 app.use((req,res,next)=>{
     console.log(req.path,req.method);
