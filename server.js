@@ -4,6 +4,9 @@ const express = require('express');
 const mongoose = require('mongoose')
 // routes
 const userRoutes = require('./routes/user')
+const productRoutes = require('./routes/products');
+const productOfferRoutes = require('./routes/productsOffer');
+
 
 //express app
 const app = express()
@@ -20,6 +23,10 @@ app.use((req,res,next)=>{
 
 // ROUTES
 app.use('/api/user',userRoutes)
+
+app.use('/api/products',productRoutes)
+
+app.use('/api/productOffer',productOfferRoutes)
 
 
 

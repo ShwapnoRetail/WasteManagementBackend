@@ -14,7 +14,6 @@ const UserSchema = new Schema({
     staffName: {
         type: String,
         required: true,
-        unique: true
     },
     password: {
         type: String,
@@ -27,8 +26,12 @@ const UserSchema = new Schema({
     role: {
         type: String,
         required: true
+    },
+    user_id: {
+        type:String,
+        required:true
     }
-})
+},{ timestamps:true })
 
 UserSchema.statics.signup = async function( staffId,staffName,  password,outletCode,role ){
 
@@ -41,8 +44,6 @@ UserSchema.statics.signup = async function( staffId,staffName,  password,outletC
         if(!validator.isStrongPassword(password)) {
             throw new Error('Password not strong enough')
         }
-    
-
         
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
