@@ -48,36 +48,7 @@ const uploadProducts = async (req, res) => {
   };
 
 
-// create product
 
-// const uploadProducts = async (req, res) => {
-//   try {
-//     // Delete all existing documents
-//     await Product.deleteMany();
-
-//     // Extract the bulk data from the request body
-//     const bulkData = req.body;
-//     const chunkSize = 5000; // Define the desired chunk size
-
-//     // Split the bulk data into smaller chunks
-//     const chunks = [];
-//     for (let i = 0; i < bulkData.length; i += chunkSize) {
-//       const chunk = bulkData.slice(i, i + chunkSize);
-//       chunks.push(chunk);
-//     }
-
-//     // Upload the chunks sequentially
-//     for (let i = 0; i < chunks.length; i++) {
-//       const chunk = chunks[i];
-//       await Product.insertMany(chunk);
-//     }
-
-//     res.status(200).json({ message: 'Bulk data uploaded successfully.' });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(404).json({ message: 'Failed to upload bulk data.' });
-//   }
-// };
 
 
 

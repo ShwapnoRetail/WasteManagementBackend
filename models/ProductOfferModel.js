@@ -5,10 +5,6 @@ const offerProductSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  cogs: {
-    type: Number,
-    required: true
-  },
   image: {
     type: String,
     required: true
