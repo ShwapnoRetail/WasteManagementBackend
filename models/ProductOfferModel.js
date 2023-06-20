@@ -1,55 +1,68 @@
 const mongoose = require('mongoose');
 
 const offerProductSchema = new mongoose.Schema({
-  article_code: {
+
+
+  new_mrp: {    // new data
+    type: String,
+    required: true
+  }, 
+
+  reason: {   // new data
     type: String,
     required: true
   },
-  image: {
+
+  av_quantity: {   // new data
+    type: Number,
+    required: true
+  },
+
+  so_quantity: {   // new data
+    type: Number,
+    required: true
+  },
+
+  image: {   // new data
     type: String,
     required: true
   },
+
+  article: {
+    type: String,
+    required: true
+  },
+
+  
+  article_name: {
+    type: String,
+    required: true
+  },
+
   min_mrp: {
     type: Number,
     required: true
   },
-  mrp: {
-    type: Number,
-    required: true
-  },
-  av_quantity: {
-    type: Number,
-    required: true
-  },
-  so_quantity: {
-    type: Number,
-    required: true
-  },
-  name: {
+
+  outlet_name: {
     type: String,
     required: true
   },
-  new_mrp: {
+  outlet_code: {
     type: String,
     required: true
   },
-  reason: {
+
+  outlet_division: {
     type: String,
     required: true
   },
-  store_code: {
+ 
+  time: {     
     type: String,
     required: true
   },
-  store_name: {
-    type: String,
-    required: true
-  },
-  time: {
-    type: String,
-    required: true
-  },
-  user_id: {
+  email_id: {
     type: String,
     required: true
   },

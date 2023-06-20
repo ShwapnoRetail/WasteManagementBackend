@@ -3,10 +3,10 @@ const mongoose = require('mongoose');
 
 // get all
 const getProducts = async (req, res) => {
-    // console.log(req.user);
-    const outletCode = req.outlet.outletCode
-    console.log(outletCode);
-    const products = await Product.find({store_code: outletCode})
+    // console.log(req.outlet.outlet_division); 
+    const outletDiv = req.outlet.outlet_division
+    // console.log(outletDiv);
+    const products = await Product.find({outlet_division: outletDiv})
     res.status(200).json(products)
 }
 
