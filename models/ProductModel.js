@@ -7,7 +7,7 @@ const productSchema = new mongoose.Schema({
   article_name: { type: String, required: true },
   // mrp: { type: String, required: true },
   min_mrp: { type: String, required: true },
-  time: { type: String, required: true },
+  // time: { type: String, required: true },
 });
 
 const Product = mongoose.model('Product', productSchema);

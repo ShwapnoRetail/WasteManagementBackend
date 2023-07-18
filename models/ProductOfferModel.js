@@ -13,10 +13,10 @@ const offerProductSchema = new mongoose.Schema({
     required: true
   },
 
-  av_quantity: {   // new data
-    type: Number,
-    required: true
-  },
+  // av_quantity: {   // new data
+  //   type: Number,
+  //   required: true
+  // },
 
   so_quantity: {   // new data
     type: Number,
@@ -25,7 +25,7 @@ const offerProductSchema = new mongoose.Schema({
 
   image: {   // new data
     type: String,
-    required: true
+    
   },
 
   article: {
@@ -57,11 +57,7 @@ const offerProductSchema = new mongoose.Schema({
     type: String,
     required: true
   },
- 
-  time: {     
-    type: String,
-    required: true
-  },
+
   email_id: {
     type: String,
     required: true

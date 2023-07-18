@@ -33,14 +33,14 @@ const getOfferProduct = async (req, res) => {
 
 // create a new 
 const createProductOffer = async (req,res) => {
-    const {new_mrp,reason,av_quantity,so_quantity,image,article,article_name,min_mrp,outlet_name,outlet_division,time,email_id,created_at,outlet_code} = req.body
+    const {new_mrp,reason,so_quantity,image,article,article_name,min_mrp,outlet_name,outlet_division,email_id,created_at,outlet_code} = req.body
     
   
     // add doc to db
     try{
         // const user_id = req.user._id
         
-        const  offerProduct = await ProdctOffer.create({new_mrp,reason,av_quantity,so_quantity,image,article,article_name,min_mrp,outlet_name,outlet_division,time,email_id,created_at,outlet_code})
+        const  offerProduct = await ProdctOffer.create({new_mrp,reason,so_quantity,image,article,article_name,min_mrp,outlet_name,outlet_division,email_id,created_at,outlet_code})
         // console.log(offerProduct);
         res.status(200).json(offerProduct)
     }catch(error){
