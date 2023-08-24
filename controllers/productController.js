@@ -10,6 +10,15 @@ const getProducts = async (req, res) => {
     res.status(200).json(products)
 }
 
+// get all
+const getAdminProducts = async (req, res) => {
+  // console.log(req.outlet.outlet_division); 
+  // const outletDiv = req.outlet.outlet_division
+  // console.log(outletDiv);
+  const products = await Product.find()
+  res.status(200).json(products)
+}
+ 
 // get single Product 
 const getProduct = async (req, res) => {
   const {id} = req.params
@@ -28,7 +37,6 @@ const getProduct = async (req, res) => {
 }
 
 // create product
-
 const uploadProducts = async (req, res) => {
     try {
       // Delete all existing documents
@@ -48,6 +56,22 @@ const uploadProducts = async (req, res) => {
   };
 
 
+  // create product
+const deleteProducts = async (req, res) => {
+  try {
+    // Delete all existing documents
+    await Product.deleteMany();
+
+
+    res.status(200).json({ message: 'Bulk data deleted successfully.' });
+  } catch (error) {
+    console.error(error);
+    res.status(404).json({ message: 'Failed to delete data.' });
+  }
+};
+
+
+
 
 
 
@@ -55,5 +79,7 @@ const uploadProducts = async (req, res) => {
   module.exports = {
     getProducts,
     uploadProducts,
-    getProduct
+    getProduct,
+    deleteProducts,
+    getAdminProducts
   }
