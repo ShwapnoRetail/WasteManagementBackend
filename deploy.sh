@@ -3,7 +3,7 @@
 source ~/.nvm/nvm.sh
 
 # Use the correct Node.js version
-nvm use 18.17.1  # Replace with your desired Node.js version
+nvm use 20.5.1  # Replace with your desired Node.js version
 
 # Fetch the latest changes from the Git repository
 # git pull origin main  # Replace 'main' with your branch name
