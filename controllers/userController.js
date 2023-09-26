@@ -56,7 +56,7 @@ const signupUser = async (req, res) => {
 };
 
 const stayAlive = async (req, res ) => {
-  res.status(200).json({ message: "staying alive!!!! "})
+  res.status(200).json({ message: "staying alive!!!!! "})
 }
 
 // bulk signUp user
