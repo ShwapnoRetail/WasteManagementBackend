@@ -11,8 +11,8 @@ nvm use 20.5.1  # Replace with your desired Node.js version
 # Install or update dependencies
 npm install
 
-# Build your application (if needed)
-npm run build
+# # Build your application (if needed)
+# npm run build
 
 # Restart your application using pm2
 pm2 restart wasteManagementProject  # Replace 'your_app_name' with your app's name in pm2
