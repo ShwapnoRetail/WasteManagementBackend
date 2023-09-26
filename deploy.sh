@@ -15,7 +15,7 @@ npm install
 npm run build
 
 # Restart your application using pm2
-pm2 restart server  # Replace 'your_app_name' with your app's name in pm2
+pm2 restart wasteManagementProject  # Replace 'your_app_name' with your app's name in pm2
 
 # Optionally, run database migrations or perform other deployment tasks here
 
