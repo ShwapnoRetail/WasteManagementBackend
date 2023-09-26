@@ -55,6 +55,10 @@ const signupUser = async (req, res) => {
   }
 };
 
+const stayAlive = async (req, res ) => {
+  res.status(200).json({ message: "staying alive "})
+}
+
 // bulk signUp user
 const bulkSignupUsers = async (req, res) => {
   const users = req.body; // Assuming the array of objects is in the request body
@@ -105,4 +109,5 @@ module.exports = {
   loginUser,
   signupUser,
   bulkSignupUsers,
+  stayAlive
 };
