@@ -1,7 +1,7 @@
 on:
     push:
       branches:
-        - main
+        - master
     workflow_dispatch:
   
   jobs:
@@ -26,4 +26,4 @@ on:
   
         - name: Connect and deploy
           run: |
-            ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout main && git pull && chmod +x deploy.sh && ./deploy.sh && exit"
+            ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout master && git pull && chmod +x deploy.sh && ./deploy.sh && exit"
