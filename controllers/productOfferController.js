@@ -1,17 +1,31 @@
 const ProdctOffer = require('../models/ProductOfferModel');
 const mongoose = require('mongoose')
 
-// get all
+// // get all
+// const getOfferProducts = async (req, res) => {
+//     console.log(req.user);
+//     try{
+//         const products = await ProdctOffer.find()
+//         res.status(200).json(products)
+//     }catch(error){
+//         res.status(400).json({error: error.message})
+//     }
+// }
+
 const getOfferProducts = async (req, res) => {
-    // console.log(req.user);
-    try{
-        const products = await ProdctOffer.find()
-        res.status(200).json(products)
-    }catch(error){
-        res.status(400).json({error: error.message})
+    const { selectedDate } = req.query;
+    const datePattern = new RegExp(`^${selectedDate}`);
+
+    try {
+        const products = await ProdctOffer.find({
+            created_at: { $regex: datePattern }
+        });
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
-    
 }
+
 
 // get single Product offer
 const getOfferProduct = async (req, res) => {
