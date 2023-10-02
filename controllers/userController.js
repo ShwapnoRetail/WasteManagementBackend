@@ -104,7 +104,7 @@ const logOutAllMembers = async (req, res) => {
   console.log("sdsd");
   try {
     // Update the is_logged_in status to false for all members
-    await User.updateMany({role: "member"}, { $set: { is_logged_in: true } });
+    await User.updateMany({role: "member"}, { $set: { is_logged_in: false } });
 
     res.status(200).json({ message: 'All members logged out successfully' });
   } catch (err) {
