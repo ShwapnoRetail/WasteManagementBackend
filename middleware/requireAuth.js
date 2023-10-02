@@ -14,8 +14,12 @@ const requireAuth = async (req,res,next) => {
 
     try {
        const {_id} = jwt.verify(token, process.env.SECRET)
-       req.user = await User.findOne({_id}).select('_id')
+       req.user = await User.findOne({_id}).select('-password')
        req.outlet = await User.findOne({_id}).select('outlet_division')
+       if(!req.user.is_logged_in){
+        throw "log out user"
+       }
+    //    console.log("hello");
        next()
     }
     catch(err){

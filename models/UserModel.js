@@ -31,6 +31,10 @@ const UserSchema = new Schema({
         type: String,
         required: true
     },
+    is_logged_in: {
+        type: Boolean,
+        required: true
+    },
 },{ timestamps:true })
 
 UserSchema.statics.signup = async function( email_id, password,outlet_division,role ,code ,outlet_name ){

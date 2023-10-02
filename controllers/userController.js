@@ -11,6 +11,11 @@ const loginUser = async (req, res) => {
 
   try {
     const user = await User.login(email_id, password);
+
+    // Update the is_logged_in status to true for the logged-in user
+    user.is_logged_in = true;
+    await user.save();
+
     // create a token
     const token = createToken(user._id);
 
@@ -58,6 +63,54 @@ const signupUser = async (req, res) => {
 const stayAlive = async (req, res ) => {
   res.status(200).json({ message: "staying alive!!!!! "})
 }
+
+
+const getAllUser = async (req, res ) => {
+  const users = await User.find({role: "member"});
+  res.status(200).json(users);
+}
+
+
+
+// Log out an individual member by ID
+const logOutMember = async (req, res) => {
+  const memberId = req.params.memberId;
+  console.log(memberId);
+
+  try {
+    // Find the user by ID
+    const user = await User.findById(memberId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Member not found' });
+    }
+
+    // Update the is_logged_in status to false
+    user.is_logged_in = false;
+
+    console.log(user);
+
+    // Save the updated user
+    await user.save();
+
+    res.status(200).json({ message: 'Member logged out successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Log out all members at once
+const logOutAllMembers = async (req, res) => {
+  console.log("sdsd");
+  try {
+    // Update the is_logged_in status to false for all members
+    await User.updateMany({role: "member"}, { $set: { is_logged_in: false } });
+
+    res.status(200).json({ message: 'All members logged out successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 // bulk signUp user
 const bulkSignupUsers = async (req, res) => {
@@ -109,5 +162,8 @@ module.exports = {
   loginUser,
   signupUser,
   bulkSignupUsers,
-  stayAlive
+  stayAlive,
+  getAllUser,
+  logOutMember,
+  logOutAllMembers
 };
