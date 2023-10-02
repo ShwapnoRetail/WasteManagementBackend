@@ -104,13 +104,40 @@ const logOutAllMembers = async (req, res) => {
   console.log("sdsd");
   try {
     // Update the is_logged_in status to false for all members
-    await User.updateMany({role: "member"}, { $set: { is_logged_in: false } });
+    await User.updateMany({role: "member"}, { $set: { is_logged_in: true } });
 
     res.status(200).json({ message: 'All members logged out successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// selfLogout user
+const selfLogout = async (req, res) => {
+
+  const userId = req.user._id; // Replace with your authentication logic to get the user ID
+
+  try {
+    // Find the user by ID
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Update the is_logged_in status to false
+    user.is_logged_in = false;
+
+    // Save the updated user
+    await user.save();
+
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
 
 // bulk signUp user
 const bulkSignupUsers = async (req, res) => {
@@ -165,5 +192,6 @@ module.exports = {
   stayAlive,
   getAllUser,
   logOutMember,
-  logOutAllMembers
+  logOutAllMembers,
+  selfLogout
 };
