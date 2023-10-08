@@ -6,7 +6,8 @@ const requireAuth = require('../middleware/requireAuth')
 const {
     getOfferProducts,
     getOfferProduct,
-    createProductOffer 
+    createProductOffer,
+    getOfferProductByOulet
 } = require('../controllers/productOfferController')
 
 
@@ -16,6 +17,9 @@ const {
 
  // get  all offer products
  router.get('/', getOfferProducts)
+
+ // get  all offer products by specific outlet
+ router.get('/outlet/:id', getOfferProductByOulet)
 
  // get single product
 router.get('/:id',getOfferProduct)
