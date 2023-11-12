@@ -35,7 +35,7 @@ const getOfferProduct = async (req, res) => {
 const getOfferProductByOulet = async (req, res) => {
   const { id } = req.params;
 
-  console.log(id);
+  // console.log(id);
 
   const itemArray = id.split("_");
 
@@ -48,7 +48,7 @@ const getOfferProductByOulet = async (req, res) => {
     created_at: { $regex: datePattern },
   });
 
-  console.log(product);
+  // console.log(product);
  
 
   if (!product) {

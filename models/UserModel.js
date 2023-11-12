@@ -35,9 +35,28 @@ const UserSchema = new Schema({
         type: Boolean,
         required: true
     },
+    active_hour: {
+        type: String,
+        default: "18.00",
+        required: true
+    },
+    loginLogoutHistory: [
+        {
+          date: {
+            type: Date,
+            required: true,
+          },
+          events: [
+            {
+              loginTime: Date,
+              logoutTime: Date,
+            },
+          ],
+        },
+      ],
 },{ timestamps:true })
 
-UserSchema.statics.signup = async function( email_id, password,outlet_division,role ,code ,outlet_name ){
+UserSchema.statics.signup = async function( email_id, password,outlet_division,role ,code ,outlet_name, is_logged_in ){
 
         const exists = await this.findOne({ email_id })
 
@@ -57,7 +76,7 @@ UserSchema.statics.signup = async function( email_id, password,outlet_division,r
 
         
         if(!exists){
-            const user = await this.create({ email_id, password: hashedPassword, outlet_division, role , outlet_code:code,outlet_name })
+            const user = await this.create({ email_id, password: hashedPassword, outlet_division, role , outlet_code:code,outlet_name, is_logged_in })
             return user
         } 
         
