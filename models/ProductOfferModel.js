@@ -25,7 +25,7 @@ const offerProductSchema = new mongoose.Schema({
 
   image: {   // new data
     type: String,
-    
+    default: "https://placehold.co/600x400?text=No+Image+Uploaded"
   },
 
   article: {

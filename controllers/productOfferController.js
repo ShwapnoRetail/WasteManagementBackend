@@ -93,8 +93,24 @@ const createProductOffer = async (req, res) => {
       created_at,
       outlet_code,
     });
-    // console.log(offerProduct);
+    console.log(offerProduct);
     res.status(200).json(offerProduct);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+
+// create a new
+const createManyProductOffer = async (req, res) => {
+
+  // add doc to db
+  try {
+    // const user_id = req.user._id
+    const offerProduct = await ProdctOffer.create(req.body);
+    console.log(offerProduct);
+    res.status(200).json(offerProduct);
+    console.log(req.body);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -105,4 +121,5 @@ module.exports = {
   getOfferProduct,
   createProductOffer,
   getOfferProductByOulet,
+  createManyProductOffer
 };

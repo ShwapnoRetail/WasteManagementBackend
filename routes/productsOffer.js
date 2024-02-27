@@ -7,7 +7,8 @@ const {
     getOfferProducts,
     getOfferProduct,
     createProductOffer,
-    getOfferProductByOulet
+    getOfferProductByOulet,
+    createManyProductOffer
 } = require('../controllers/productOfferController')
 
 
@@ -26,5 +27,8 @@ router.get('/:id',getOfferProduct)
  
  // upload products
  router.post('/', createProductOffer)
+
+ // upload products
+ router.post('/createall', createManyProductOffer)
  
  module.exports = router
