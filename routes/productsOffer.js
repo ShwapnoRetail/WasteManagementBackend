@@ -8,7 +8,8 @@ const {
     getOfferProduct,
     createProductOffer,
     getOfferProductByOulet,
-    createManyProductOffer
+    createManyProductOffer,
+    getTodaysOfferProductByOulet
 } = require('../controllers/productOfferController')
 
 
@@ -21,6 +22,10 @@ const {
 
  // get  all offer products by specific outlet
  router.get('/outlet/:id', getOfferProductByOulet)
+
+
+ // get  all offer products by specific outlet
+ router.get('/todaySubmission', getTodaysOfferProductByOulet)
 
  // get single product
 router.get('/:id',getOfferProduct)
