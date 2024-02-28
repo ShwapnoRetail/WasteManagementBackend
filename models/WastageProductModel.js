@@ -9,7 +9,7 @@ const productSchema = new mongoose.Schema({
   sales_amount: { type: String, required: true },
   wastage_amount: { type: String, required: true },
   percentage: { type: String, required: true },
-});
+},{ timestamps:true });
 
 const WastageProduct = mongoose.model("wastageProduct", productSchema);
 
