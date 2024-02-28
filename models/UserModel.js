@@ -64,9 +64,9 @@ UserSchema.statics.signup = async function( email_id, password,outlet_division,r
             throw new Error('This user already exists')
         }
 
-        if(!validator.isStrongPassword(password)) {
-            throw new Error('Password not strong enough')
-        }
+        // if(!validator.isStrongPassword(password)) {
+        //     throw new Error('Password not strong enough')
+        // }
         
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
@@ -89,7 +89,8 @@ UserSchema.statics.login = async function(email_id, password) {
 
     if(email_id && password){
         
-        const user = await this.findOne({ email_id })
+        // const user = await this.findOne({ email_id })
+        const user = await this.findOne({ email_id: { $regex: new RegExp(email_id, 'i') } });
 
         if(!user) {
             throw new Error('User does not exist')
