@@ -5,11 +5,11 @@ const mongoose = require("mongoose");
 const getWastageProducts = async (req, res) => {
 
   const user = req.user;
-//   console.log(user);
+  console.log(user);
 //   console.log(req.body);
   console.log( user.outlet_code);
-  const products = await wastageProduct.find({outlet_code: user.outlet_code})
-
+  const products = await wastageProduct.find({outlet_code: user?.outlet_code.trim()})
+  console.log(products);
   res.status(200).json(products);
 };
 
