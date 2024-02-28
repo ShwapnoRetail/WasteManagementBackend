@@ -29,7 +29,6 @@ app.use('/api/products',productRoutes)
 
 app.use('/api/productOffer',productOfferRoutes)
 
-
 app.use('/api/wastageProduct',wastageProductRoutes)
 
 
