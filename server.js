@@ -14,7 +14,7 @@ const app = express()
 
 
 // middleware
-app.use(express.json({ limit: '100mb' }))
+app.use(express.json({ limit: '1000mb' }))
 app.use(cors());
 
 app.use((req,res,next)=>{
