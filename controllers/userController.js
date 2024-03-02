@@ -247,8 +247,39 @@ const setHour = async (req, res) => {
     }
 
       // console.log(user);
+    // console.log(time);
     // Update the is_logged_in status to false
     user.active_hour = time;
+
+    // Save the updated user
+    await user.save();
+
+    res.status(200).json({ message: "hour set successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const setEndHour = async (req, res) => {
+  const userId = req.params.id;
+  // console.log(memberId);
+
+  const {time} = req.body
+
+  console.log(time);
+
+  try {
+    // Find the user by ID
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+      // console.log(user);
+    // console.log(time);
+    // Update the is_logged_in status to false
+    user.inactive_hour = time;
 
     // Save the updated user
     await user.save();
@@ -402,5 +433,6 @@ module.exports = {
   selfLogout,
   deleteUser,
   setHour,
+  setEndHour,
   // updateUser
 };

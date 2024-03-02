@@ -40,6 +40,11 @@ const UserSchema = new Schema({
         default: "18.00",
         required: true
     },
+    inactive_hour: {
+        type: String,
+        default: "18.30",
+        required: true
+    },
     loginLogoutHistory: [
         {
           date: {

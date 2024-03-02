@@ -3,7 +3,7 @@ const router = express.Router();
 const requireAuth = require("../middleware/requireAuth");
 
 // constroller functions
-const { setHour, signupUser, loginUser, bulkSignupUsers, deleteUser ,getUser, getAllUser, logOutMember , logOutAllMembers, selfLogout, stayAlive} = require('../controllers/userController')
+const { setHour, signupUser, loginUser, bulkSignupUsers, deleteUser ,getUser, getAllUser, logOutMember , logOutAllMembers, selfLogout, stayAlive, setEndHour} = require('../controllers/userController')
 
 // login route
 router.post('/login', loginUser)
@@ -11,8 +11,11 @@ router.post('/login', loginUser)
 // sign up route
 router.post('/signup', signupUser)
 
-// sign up route
+// set start hour
 router.patch('/sethour/:id', setHour)
+
+// set end hour
+router.patch('/setendhour/:id', setEndHour)
 
 // delete user
 router.post('/delete/:id', deleteUser)

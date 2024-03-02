@@ -3,13 +3,21 @@ const mongoose = require("mongoose");
 
 // get all
 const getProducts = async (req, res) => {
-  // console.log(req.outlet.outlet_division);
+  const currentHour = new Date().getHours();
+  const currentMint = new Date().getMinutes();
+  const currentTime =parseFloat(`${currentHour}.${currentMint}`);
 
-  const outletDiv = req.outlet.outlet_division;
-  // console.log(outletDiv);
-  const products = await Product.find({outlet_division: outletDiv})
 
-  res.status(200).json(products);
+  console.log(parseFloat(req.user.active_hour) ,currentTime ,  parseFloat(req.user.inactive_hour));
+
+  if (parseFloat(req.user.active_hour) <= currentTime && currentTime  <= parseFloat(req.user.inactive_hour)) {
+    const outletDiv = req.outlet.outlet_division;
+    // console.log(outletDiv);
+    const products = await Product.find({ outlet_division: outletDiv });
+    res.status(200).json(products);
+  } else {
+    res.status(200).json([]);
+  }
 };
 
 // get all
