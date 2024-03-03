@@ -8,7 +8,7 @@ const getWastageProducts = async (req, res) => {
   // console.log(user);
 //   console.log(req.body);
   const products = await wastageProduct.find({outlet_code: user.outlet_code.trim()})
-  console.log(products);
+  // console.log(products);
   res.status(200).json(products);
 };
 

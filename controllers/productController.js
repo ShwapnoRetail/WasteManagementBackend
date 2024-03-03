@@ -12,8 +12,9 @@ const getProducts = async (req, res) => {
 
   if (parseFloat(req.user.active_hour) <= currentTime && currentTime  <= parseFloat(req.user.inactive_hour)) {
     const outletDiv = req.outlet.outlet_division;
-    // console.log(outletDiv);
+    console.log(outletDiv);
     const products = await Product.find({ outlet_division: outletDiv });
+    console.log(products);
     res.status(200).json(products);
   } else {
     res.status(200).json([]);
