@@ -21,7 +21,7 @@ const getProducts = async (req, res) => {
   // }
   const outletDiv = req.outlet.outlet_division;
   const products = await Product.find({ outlet_division: outletDiv });
-  console.log(products);
+  // console.log(products);
   res.status(200).json(products);
 };
 

@@ -46,10 +46,11 @@ const loginUser = async (req, res) => {
 
     const outlet_code = user.outlet_code;
     const active_hour = user.active_hour;
+    const inactive_hour = user.inactive_hour;
 
     console.log(user);
 
-    res.status(200).json({ email_id, token, role, outlet_name, outlet_code , active_hour});
+    res.status(200).json({ email_id, token, role, outlet_name, outlet_code , active_hour, inactive_hour});
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
