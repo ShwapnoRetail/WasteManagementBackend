@@ -15,7 +15,7 @@ const requireAuth = async (req,res,next) => {
     try {
        const {_id} = jwt.verify(token, process.env.SECRET)
        req.user = await User.findOne({_id}).select('-password')
-       console.log("In mid: ",req.user);
+    //    console.log("In mid: ",req.user);
        req.outlet = await User.findOne({_id}).select('outlet_division')
        if(!req.user.is_logged_in){
         throw "log out user"

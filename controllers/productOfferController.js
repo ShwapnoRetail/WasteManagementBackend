@@ -39,12 +39,15 @@ const getOfferProductByOulet = async (req, res) => {
 
   const itemArray = id.split("_");
 
-  const code = itemArray[0]
+  const email = itemArray[0] + "om@acilogistics.net"
   const selectedDate = itemArray[1]
+
+  // console.log(({email,selectedDate}));
+
   const datePattern = new RegExp(`^${selectedDate}`);
 
   const product = await ProdctOffer.find({
-    outlet_code: code,
+    email_id: { $regex: new RegExp(email, 'i') },
     created_at: { $regex: datePattern },
   });
 
