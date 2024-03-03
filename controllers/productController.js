@@ -8,17 +8,20 @@ const getProducts = async (req, res) => {
   const currentTime =parseFloat(`${currentHour}.${currentMint}`);
 
 
-  console.log(parseFloat(req.user.active_hour) ,currentTime ,  parseFloat(req.user.inactive_hour));
+  // console.log(parseFloat(req.user.active_hour) ,currentTime ,  parseFloat(req.user.inactive_hour));
 
-  if (parseFloat(req.user.active_hour) <= currentTime && currentTime  <= parseFloat(req.user.inactive_hour)) {
-    const outletDiv = req.outlet.outlet_division;
-    console.log(outletDiv);
-    const products = await Product.find({ outlet_division: outletDiv });
-    console.log(products);
-    res.status(200).json(products);
-  } else {
-    res.status(200).json([]);
-  }
+  // if (parseFloat(req.user.active_hour) <= currentTime && currentTime  <= parseFloat(req.user.inactive_hour)) {
+  //   const outletDiv = req.outlet.outlet_division;
+  //   console.log(outletDiv);
+  //   const products = await Product.find({ outlet_division: outletDiv });
+  //   console.log(products);
+  //   res.status(200).json(products);
+  // } else {
+  //   res.status(200).json([]);
+  // }
+  const products = await Product.find({ outlet_division: outletDiv });
+  console.log(products);
+  res.status(200).json(products);
 };
 
 // get all
