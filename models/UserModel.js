@@ -31,6 +31,11 @@ const UserSchema = new Schema({
         type: String,
         required: true
     },
+    view: {
+        type: String,
+        required: true,
+        default: "normal"
+    },
     is_logged_in: {
         type: Boolean,
         required: true

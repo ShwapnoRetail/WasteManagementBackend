@@ -3,7 +3,7 @@ const router = express.Router();
 const requireAuth = require("../middleware/requireAuth");
 
 // constroller functions
-const { setHour, signupUser, loginUser, bulkSignupUsers, deleteUser ,getUser, getAllUser, logOutMember , logOutAllMembers, selfLogout, stayAlive, setEndHour} = require('../controllers/userController')
+const { setHour, signupUser, loginUser, bulkSignupUsers, deleteUser ,getUser, getAllUser, logOutMember , logOutAllMembers, selfLogout, stayAlive, setEndHour, updateView} = require('../controllers/userController')
 
 // login route
 router.post('/login', loginUser)
@@ -31,6 +31,9 @@ router.post('/logout',requireAuth, selfLogout)
 
 //bulk sign up route
 router.post('/bulksignup', bulkSignupUsers)
+
+//update view
+router.patch('/updateView/:id', updateView)
 
 // get all users
 router.get('/getmembers', getAllUser)

@@ -47,10 +47,11 @@ const loginUser = async (req, res) => {
     const outlet_code = user.outlet_code;
     const active_hour = user.active_hour;
     const inactive_hour = user.inactive_hour;
+    const view = user.view;
 
     console.log(user);
 
-    res.status(200).json({ email_id, token, role, outlet_name, outlet_code , active_hour, inactive_hour});
+    res.status(200).json({ email_id, token, role, outlet_name, outlet_code , active_hour, inactive_hour, view});
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -291,6 +292,34 @@ const setEndHour = async (req, res) => {
   }
 };
 
+
+const updateView = async (req,res) => {
+    const userId = req.params.id;
+    // const newView = req.body.view;
+
+    const {view} = req.body
+
+    try {
+        // Find the user by ID
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Update the user's view field
+        user.view = view;
+
+        // Save the updated user
+        await user.save();
+
+        res.json({ message: 'User view updated successfully', user });
+    } catch (error) {
+        console.error('Error updating user view:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
 // Log out all members at once
 // const logOutAllMembers = async (req, res) => {
 //   // console.log("sdsd");
@@ -435,5 +464,6 @@ module.exports = {
   deleteUser,
   setHour,
   setEndHour,
+  updateView
   // updateUser
 };
