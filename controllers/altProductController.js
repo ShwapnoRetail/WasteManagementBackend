@@ -41,7 +41,7 @@ const uploadAltProducts = async (req, res) => {
     // Extract the bulk data from the request body
     const bulkData = req.body;
 
-    console.log(req.body[0]);
+    // console.log(req.body[0]);
 
     // Insert the new bulk data
     await AltProduct.insertMany(bulkData);
@@ -69,7 +69,7 @@ const uploadMargin = async (req, res) => {
     // Extract the bulk data from the request body
     const bulkData = req.body;
 
-    console.log(req.body);
+    // console.log(req.body);
 
     // Insert the new bulk data
     await CatMargin.insertMany(bulkData);

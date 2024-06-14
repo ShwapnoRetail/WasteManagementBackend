@@ -34,7 +34,7 @@ const getWastageProducts = async (req, res) => {
 //   };
   
 const uploadWastageProducts = async (req, res) => {
-  console.log(req.body[0]);
+  // console.log(req.body[0]);
   try {
     // Extract the bulk data and chunk count from the request body
     const { chunkCount, bulkData } = req.body;

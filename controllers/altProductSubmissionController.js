@@ -69,7 +69,7 @@ const fetchDataByOutletAndDate = async (req, res) => {
         },
       });
 
-      console.log("in if",data);
+      // console.log("in if",data);
 
       // Respond with the fetched data
       res.status(200).json(data);
@@ -85,7 +85,7 @@ const fetchDataByOutletAndDate = async (req, res) => {
         },
       });
 
-      console.log("in else",data);
+      // console.log("in else",data);
 
       // Respond with the fetched data
       res.status(200).json(data);

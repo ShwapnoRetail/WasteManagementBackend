@@ -49,7 +49,7 @@ const loginUser = async (req, res) => {
     const inactive_hour = user.inactive_hour;
     const view = user.view;
 
-    console.log(user);
+    // console.log(user);
 
     res.status(200).json({ email_id, token, role, outlet_name, outlet_code , active_hour, inactive_hour, view});
   } catch (err) {
@@ -212,7 +212,7 @@ const logOutMember = async (req, res) => {
     if (today) {
       today.events.push({ logoutTime: new Date() });
     } else {
-      console.log(currentDate);
+      // console.log(currentDate);
       user.loginLogoutHistory.push({
         date: currentDate,
         events: [{ logoutTime: new Date() }],
@@ -238,7 +238,7 @@ const setHour = async (req, res) => {
 
   const {time} = req.body
 
-  console.log(time);
+  // console.log(time);
 
   try {
     // Find the user by ID
@@ -268,7 +268,7 @@ const setEndHour = async (req, res) => {
 
   const {time} = req.body
 
-  console.log(time);
+  // console.log(time);
 
   try {
     // Find the user by ID
