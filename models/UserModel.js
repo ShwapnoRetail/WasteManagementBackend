@@ -38,7 +38,7 @@ const UserSchema = new Schema({
     },
     is_logged_in: {
         type: Boolean,
-        required: true
+        default: false
     },
     active_hour: {
         type: String,

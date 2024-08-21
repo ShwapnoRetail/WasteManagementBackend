@@ -9,6 +9,10 @@ const altProductRoutes = require("./routes/altProducts");
 const altProductSubRoutes = require("./routes/altProductsSub");
 const productOfferRoutes = require("./routes/productsOffer");
 const wastageProductRoutes = require("./routes/wastageProducts");
+const salesProductRoutes = require("./routes/salesRoutes");
+const pnpInvoiceRoutes = require("./routes/pnpInvoiceRoutes");
+const wastageRoute = require("./routes/wastageRoute");
+const serviceRoutes = require("./routes/serviceRoutes");
 
 //express app
 const app = express();
@@ -34,6 +38,12 @@ app.use("/api/altProductsSub", altProductSubRoutes);
 app.use("/api/productOffer", productOfferRoutes);
 
 app.use("/api/wastageProduct", wastageProductRoutes);
+
+app.use("/api/sales", salesProductRoutes);
+
+app.use("/api/pnpInvoices", pnpInvoiceRoutes);
+app.use("/api/pnpWastage", wastageRoute);
+app.use("/api/services", serviceRoutes);
 
 // connect to db
 mongoose

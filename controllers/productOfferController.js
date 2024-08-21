@@ -3,12 +3,29 @@ const mongoose = require("mongoose");
 
 const getOfferProducts = async (req, res) => {
   const { selectedDate } = req.query;
-  const datePattern = new RegExp(`^${selectedDate}`);
+
+
+  const startOfDay = new Date(selectedDate);
+  startOfDay.setUTCHours(0, 0, 0, 0);
+
+  const endOfDay = new Date(selectedDate);
+  endOfDay.setUTCHours(23, 59, 59, 999);
 
   try {
-    const products = await ProdctOffer.find({
-      created_at: { $regex: datePattern },
-    });
+    const products = await ProdctOffer.aggregate([
+      {
+        $match: {
+          created_at: {
+            $gte: startOfDay,
+            $lte: endOfDay,
+          },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+    ]);
+
     res.status(200).json(products);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -44,12 +61,34 @@ const getOfferProductByOulet = async (req, res) => {
 
   // console.log(({email,selectedDate}));
 
-  const datePattern = new RegExp(`^${selectedDate}`);
+  const startOfDay = new Date(selectedDate);
+  startOfDay.setUTCHours(0, 0, 0, 0);
 
-  const product = await ProdctOffer.find({
-    email_id: { $regex: new RegExp(email, 'i') },
-    created_at: { $regex: datePattern },
-  });
+  const endOfDay = new Date(selectedDate);
+  endOfDay.setUTCHours(23, 59, 59, 999);
+
+  // const datePattern = new RegExp(`^${selectedDate}`);
+
+
+
+  // const product = await ProdctOffer.find({
+  //   email_id: { $regex: new RegExp(email, 'i') },
+  //   created_at: { $regex: datePattern },
+  // });
+
+  const product = await ProdctOffer.aggregate([
+      {
+        $match: {
+          created_at: {
+            $gte: startOfDay,
+            $lte: endOfDay,
+          },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+    ]);
 
   // console.log(product);
  
@@ -73,12 +112,28 @@ const getTodaysOfferProductByOulet = async (req, res) => {
 
   const code = req.user.outlet_code
   const selectedDate = formatDate(new Date())
-  const datePattern = new RegExp(`^${selectedDate}`);
+  // const datePattern = new RegExp(`^${selectedDate}`);
 
-  const product = await ProdctOffer.find({
-    outlet_code: code,
-    created_at: { $regex: datePattern },
-  });
+  const startOfDay = new Date(selectedDate);
+  startOfDay.setUTCHours(0, 0, 0, 0);
+
+  const endOfDay = new Date(selectedDate);
+  endOfDay.setUTCHours(23, 59, 59, 999);
+
+  const product = await ProdctOffer.aggregate([
+    {
+      $match: {
+        created_at: {
+          $gte: startOfDay,
+          $lte: endOfDay,
+        },
+        outlet_code: code
+      },
+    },
+    {
+      $sort: { _id: 1 },
+    },
+  ]);
 
   // console.log(product);
  
