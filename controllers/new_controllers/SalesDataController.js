@@ -79,6 +79,33 @@ function addCumulativeValuesByOutletAndCat(data) {
       };
   });
 }
+function addCumulativeValuesByOutletAndOutlet(data) {
+  const cumulativeData = {};
+
+  return data.map(item => {
+      const { outlet_code, article, dailySales, dailyWastage } = item;
+      const key = `${outlet_code}_${article}`;
+
+      if (!cumulativeData[key]) {
+          cumulativeData[key] = {
+              cumulativeSales: 0,
+              cumulativeWastage: 0
+          };
+      }
+
+      cumulativeData[key].cumulativeSales += dailySales;
+      cumulativeData[key].cumulativeWastage += dailyWastage;
+
+      const cumulativeSWPercentage = (cumulativeData[key].cumulativeWastage / cumulativeData[key].cumulativeSales) * 100;
+
+      return {
+          ...item,
+          cumulativeSales: cumulativeData[key].cumulativeSales,
+          cumulativeWastage: cumulativeData[key].cumulativeWastage,
+          cumulativeSWPercentage: cumulativeSWPercentage.toFixed(5) + "%"
+      };
+  });
+}
 
 const createSalesData = async (req, res) => {
   try {
@@ -802,7 +829,7 @@ const getSalesAndWastageDataByDateRangeCat = async (req, res) => {
       _id: {
         outlet_code: "$wastage_data.outlet_code",
         date: "$wastage_date",
-        cat: "$invoice_data.cat",
+        cat: "$wastage_data.cat",
       },
       dailyWastage: { $sum: "$wastage_data.amount" },
     },
@@ -836,6 +863,7 @@ const getSalesAndWastageDataByDateRangeCat = async (req, res) => {
       let wastageP = wastageData.find(
         (item) =>
           item.outlet_code === sales.outlet_code &&
+          item.cat === sales.cat &&
           item.date.toISOString().split("T")[0] ===
             sales.date.toISOString().split("T")[0]
       );
@@ -864,9 +892,9 @@ const getSalesAndWastageDataByDateRangeCat = async (req, res) => {
 
     // console.log({ combinedData });
 
-    const result = addCumulativeValuesByOutletAndCat(combinedData);
+    // const result = addCumulativeValuesByOutletAndCat(combinedData);
 
-    res.status(200).json(result);
+    res.status(200).json(combinedData);
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).json({ error: "Failed to fetch data" });
@@ -1007,6 +1035,152 @@ const getSalesAndShrinkageDataByDateRangeCat = async (req, res) => {
     const result = addCumulativeValuesByOutletAndCat(combinedData);
 
     res.status(200).json(result);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({ error: "Failed to fetch data" });
+  }
+};
+
+
+const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
+  const { startDate, endDate } = req.query;
+
+  const matchConditions = {
+    invoice_date: { $gte: new Date(startDate), $lte: new Date(endDate) },
+  };
+
+  const aggregationPipeline = [
+    { $match: matchConditions },
+    { $unwind: "$invoice_data" },
+  ];
+
+  if (req.user.role === "member") {
+    aggregationPipeline.push({
+      $match: {
+        "invoice_data.outlet_code": req.user.outlet_code,
+      },
+    });
+  }
+
+  aggregationPipeline.push({
+    $group: {
+      _id: {
+        outlet_code: "$invoice_data.outlet_code",
+        date: "$invoice_date",
+        cat: "$invoice_data.cat",
+        article: "$invoice_data.article",
+      },
+      dailySales: { $sum: "$invoice_data.sales_tp" },
+      day: { $first: { $dayOfWeek: "$invoice_date" } },
+    },
+  });
+
+  aggregationPipeline.push({
+    $project: {
+      _id: 0,
+      outlet_code: "$_id.outlet_code",
+      dailySales: 1,
+      date: "$_id.date",
+      article: "$_id.article",
+      cat: "$_id.cat",
+      day: 1,
+    },
+  });
+
+  aggregationPipeline.push({ $sort: { date: 1 } });
+
+  const matchStage = {
+    wastage_date: { $gte: new Date(startDate), $lte: new Date(endDate) },
+  };
+
+  const aggregationPipeline2 = [
+    { $match: matchStage },
+    { $unwind: "$wastage_data" },
+  ];
+
+  if (req.user.role === "member") {
+    aggregationPipeline2.push({
+      $match: { "wastage_data.outlet_code": req.user.outlet_code },
+    });
+  }
+
+  aggregationPipeline2.push({
+    $match: { "wastage_data.movement": { $in: ["551", "552"] } },
+  });
+
+  aggregationPipeline2.push({
+    $group: {
+      _id: {
+        outlet_code: "$wastage_data.outlet_code",
+        date: "$wastage_date",
+        cat: "$invoice_data.cat",
+        article: "$invoice_data.article",
+      },
+      dailyWastage: { $sum: "$wastage_data.amount" },
+    },
+  });
+
+  aggregationPipeline2.push({
+    $addFields: {
+      dailyWastage: { $abs: "$dailyWastage" },
+    },
+  });
+
+  aggregationPipeline2.push({
+    $project: {
+      _id: 0,
+      outlet_code: "$_id.outlet_code",
+      dailyWastage: "$dailyWastage",
+      _id: "$_id.date",
+      date: "$_id.date",
+      article: "$_id.article",
+      cat: "$_id.cat",
+    },
+  });
+
+  aggregationPipeline.push({ $sort: { date: 1 } });
+
+  try {
+    const salesData = await PNPInvoiceModel.aggregate(aggregationPipeline);
+    console.log(salesData);
+    const wastageData = await WastageDailyModel.aggregate(aggregationPipeline2);
+
+    const combinedData = salesData.map((sales, index) => {
+      let wastageP = wastageData.find(
+        (item) =>
+          item.outlet_code === sales.outlet_code &&
+          item.date.toISOString().split("T")[0] ===
+            sales.date.toISOString().split("T")[0]
+      );
+      // console.log({ wastageP });
+      return {
+        date: sales.date.toISOString().split("T")[0],
+        day: [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ][sales.day - 1],
+        dailySales: sales.dailySales,
+        outlet_code: sales.outlet_code,
+        dailyWastage: wastageP?.dailyWastage || 0,
+        dailySWPercentage:
+          (((wastageP?.dailyWastage || 0) / sales.dailySales) * 100).toFixed(
+            5
+          ) + "%",
+        cat: sales.cat,
+        article: sales.article,
+      };
+    });
+
+    // console.log({ combinedData });
+
+    // const result = addCumulativeValuesByOutletAndOutlet(combinedData);
+
+    res.status(200).json(combinedData);
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).json({ error: "Failed to fetch data" });
@@ -1243,5 +1417,7 @@ module.exports = {
   getSalesAndShrinkageDataByDateRangeOutlets,
 
   getSalesAndWastageDataByDateRangeCat,
-  getSalesAndShrinkageDataByDateRangeCat
+  getSalesAndShrinkageDataByDateRangeCat,
+
+  getSalesAndWastageDataByDateRangeArticle
 };
