@@ -52,60 +52,60 @@ function addCumulativeValuesByOutlet(data) {
   });
 }
 
-function addCumulativeValuesByOutletAndCat(data) {
-  const cumulativeData = {};
+// function addCumulativeValuesByOutletAndCat(data) {
+//   const cumulativeData = {};
 
-  return data.map(item => {
-      const { outlet_code, cat, dailySales, dailyWastage } = item;
-      const key = `${outlet_code}_${cat}`;
+//   return data.map(item => {
+//       const { outlet_code, cat, dailySales, dailyWastage } = item;
+//       const key = `${outlet_code}_${cat}`;
 
-      if (!cumulativeData[key]) {
-          cumulativeData[key] = {
-              cumulativeSales: 0,
-              cumulativeWastage: 0
-          };
-      }
+//       if (!cumulativeData[key]) {
+//           cumulativeData[key] = {
+//               cumulativeSales: 0,
+//               cumulativeWastage: 0
+//           };
+//       }
 
-      cumulativeData[key].cumulativeSales += dailySales;
-      cumulativeData[key].cumulativeWastage += dailyWastage;
+//       cumulativeData[key].cumulativeSales += dailySales;
+//       cumulativeData[key].cumulativeWastage += dailyWastage;
 
-      const cumulativeSWPercentage = (cumulativeData[key].cumulativeWastage / cumulativeData[key].cumulativeSales) * 100;
+//       const cumulativeSWPercentage = (cumulativeData[key].cumulativeWastage / cumulativeData[key].cumulativeSales) * 100;
 
-      return {
-          ...item,
-          cumulativeSales: cumulativeData[key].cumulativeSales,
-          cumulativeWastage: cumulativeData[key].cumulativeWastage,
-          cumulativeSWPercentage: cumulativeSWPercentage.toFixed(5) + "%"
-      };
-  });
-}
-function addCumulativeValuesByOutletAndOutlet(data) {
-  const cumulativeData = {};
+//       return {
+//           ...item,
+//           cumulativeSales: cumulativeData[key].cumulativeSales,
+//           cumulativeWastage: cumulativeData[key].cumulativeWastage,
+//           cumulativeSWPercentage: cumulativeSWPercentage.toFixed(5) + "%"
+//       };
+//   });
+// }
+// function addCumulativeValuesByOutletAndOutlet(data) {
+//   const cumulativeData = {};
 
-  return data.map(item => {
-      const { outlet_code, article, dailySales, dailyWastage } = item;
-      const key = `${outlet_code}_${article}`;
+//   return data.map(item => {
+//       const { outlet_code, article, dailySales, dailyWastage } = item;
+//       const key = `${outlet_code}_${article}`;
 
-      if (!cumulativeData[key]) {
-          cumulativeData[key] = {
-              cumulativeSales: 0,
-              cumulativeWastage: 0
-          };
-      }
+//       if (!cumulativeData[key]) {
+//           cumulativeData[key] = {
+//               cumulativeSales: 0,
+//               cumulativeWastage: 0
+//           };
+//       }
 
-      cumulativeData[key].cumulativeSales += dailySales;
-      cumulativeData[key].cumulativeWastage += dailyWastage;
+//       cumulativeData[key].cumulativeSales += dailySales;
+//       cumulativeData[key].cumulativeWastage += dailyWastage;
 
-      const cumulativeSWPercentage = (cumulativeData[key].cumulativeWastage / cumulativeData[key].cumulativeSales) * 100;
+//       const cumulativeSWPercentage = (cumulativeData[key].cumulativeWastage / cumulativeData[key].cumulativeSales) * 100;
 
-      return {
-          ...item,
-          cumulativeSales: cumulativeData[key].cumulativeSales,
-          cumulativeWastage: cumulativeData[key].cumulativeWastage,
-          cumulativeSWPercentage: cumulativeSWPercentage.toFixed(5) + "%"
-      };
-  });
-}
+//       return {
+//           ...item,
+//           cumulativeSales: cumulativeData[key].cumulativeSales,
+//           cumulativeWastage: cumulativeData[key].cumulativeWastage,
+//           cumulativeSWPercentage: cumulativeSWPercentage.toFixed(5) + "%"
+//       };
+//   });
+// }
 
 const createSalesData = async (req, res) => {
   try {
@@ -207,8 +207,11 @@ const createSalesAndWastageData = async (req, res) => {
   }
 };
 
+
+
 const getSalesAndWastageDataByDateRange = async (req, res) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate, movement } = req.query;
+
 
   const matchConditions = {
     invoice_date: { $gte: new Date(startDate), $lte: new Date(endDate) },
@@ -228,14 +231,14 @@ const getSalesAndWastageDataByDateRange = async (req, res) => {
 
   // dailySales: { $sum: "$value" },
 
-  // Group data by outlet_code and date, summing sales_tp to calculate value
+
   aggregationPipeline.push({
     $group: {
       _id: {
         // outlet_code: "$invoice_data.outlet_code",
         date: "$invoice_date",
       },
-      dailySales: { $sum: "$invoice_data.sales_tp" },
+      dailySales: { $sum: "$invoice_data.nsi" },
       day: { $first: { $dayOfWeek: "$invoice_date" } },
     },
   });
@@ -270,152 +273,7 @@ const getSalesAndWastageDataByDateRange = async (req, res) => {
   }
 
   aggregationPipeline2.push({
-    $match: { "wastage_data.movement": { $in: ["551", "552"] } },
-  });
-
-  aggregationPipeline2.push({
-    $group: {
-      _id: {
-        // outlet_code: "$wastage_data.outlet_code",
-        // outlet_name: "$wastage_data.outlet_name",
-        date: "$wastage_date",
-      },
-      dailyWastage: { $sum: "$wastage_data.amount" },
-    },
-  });
-
-  aggregationPipeline2.push({
-    $addFields: {
-      dailyWastage: { $abs: "$dailyWastage" },
-    },
-  });
-
-  aggregationPipeline2.push(
-    // Project the final output format
-    {
-      $project: {
-        _id: 0,
-        // outlet_code: "$_id.outlet_code",
-        // outlet_name: "$_id.outlet_name",
-        dailyWastage: "$dailyWastage",
-        _id: "$_id.date",
-        date: "$_id.date",
-      },
-    }
-  );
-
-  aggregationPipeline2.push({ $sort: { date: 1 } });
-
-  try {
-    const salesData = await PNPInvoiceModel.aggregate(aggregationPipeline);
-    const wastageData = await WastageDailyModel.aggregate(aggregationPipeline2);
-
-    // console.log(salesData);
-    // console.log(wastageData);
-
-    const combinedData = salesData.map((sales, index) => {
-      let wastageP = wastageData.find(
-        (item) =>
-          item.outlet_code === sales.outlet_code &&
-          item.date.toISOString().split("T")[0] ===
-            sales.date.toISOString().split("T")[0]
-      );
-      console.log({ wastageP });
-      return {
-        date: sales.date.toISOString().split("T")[0],
-        day: [
-          "Sunday",
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-        ][sales.day - 1],
-        dailySales: sales.dailySales,
-        dailyWastage: wastageP?.dailyWastage || 0,
-        dailySWPercentage:
-          (((wastageP?.dailyWastage || 0) / sales.dailySales) * 100).toFixed(
-            5
-          ) + "%",
-      };
-    });
-
-    // console.log({ combinedData });
-
-    const result = addCumulativeValues(combinedData);
-
-    res.status(200).json(result);
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).json({ error: "Failed to fetch data" });
-  }
-};
-
-const getSalesAndShrinkageDataByDateRange = async (req, res) => {
-  const { startDate, endDate } = req.query;
-
-  const matchConditions = {
-    invoice_date: { $gte: new Date(startDate), $lte: new Date(endDate) },
-  };
-
-  const aggregationPipeline = [
-    { $match: matchConditions },
-    { $unwind: "$invoice_data" },
-  ];
-
-  // Add outlet_code match only if provided
-  if (req.user.role === "member") {
-    aggregationPipeline.push({
-      $match: { "invoice_data.outlet_code": req.user.outlet_code },
-    });
-  }
-
-  // dailySales: { $sum: "$value" },
-
-  // Group data by outlet_code and date, summing sales_tp to calculate value
-  aggregationPipeline.push({
-    $group: {
-      _id: {
-        // outlet_code: "$invoice_data.outlet_code",
-        date: "$invoice_date",
-      },
-      dailySales: { $sum: "$invoice_data.sales_tp" },
-      day: { $first: { $dayOfWeek: "$invoice_date" } },
-    },
-  });
-
-  // Project the final output format
-  aggregationPipeline.push({
-    $project: {
-      _id: 0,
-      outlet_code: "$_id.outlet_code",
-      dailySales: 1,
-      date: "$_id.date",
-      day: 1,
-    },
-  });
-  aggregationPipeline.push({ $sort: { date: 1 } });
-
-  const matchStage = {
-    wastage_date: { $gte: new Date(startDate), $lte: new Date(endDate) },
-  };
-
-  const aggregationPipeline2 = [
-    // Match documents with the given wastage_date (and outlet_code if provided)
-    { $match: matchStage },
-    // Unwind the wastage_data array to deconstruct it into individual documents
-    { $unwind: "$wastage_data" },
-  ];
-
-  if (req.user.role === "member") {
-    aggregationPipeline2.push({
-      $match: { "wastage_data.outlet_code": req.user.outlet_code },
-    });
-  }
-
-  aggregationPipeline2.push({
-    $match: { "wastage_data.movement": { $in: ["Z11", "Z12"] } },
+    $match: { "wastage_data.movement": { $in: movement } },
   });
 
   aggregationPipeline2.push({
@@ -498,7 +356,7 @@ const getSalesAndShrinkageDataByDateRange = async (req, res) => {
 };
 
 const getSalesAndWastageDataByDateRangeOutlets = async (req, res) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate, movement } = req.query;
 
   const matchConditions = {
     invoice_date: { $gte: new Date(startDate), $lte: new Date(endDate) },
@@ -521,7 +379,7 @@ const getSalesAndWastageDataByDateRangeOutlets = async (req, res) => {
         outlet_code: "$invoice_data.outlet_code",
         date: "$invoice_date",
       },
-      dailySales: { $sum: "$invoice_data.sales_tp" },
+      dailySales: { $sum: "$invoice_data.nsi" },
       day: { $first: { $dayOfWeek: "$invoice_date" } },
     },
   });
@@ -554,138 +412,7 @@ const getSalesAndWastageDataByDateRangeOutlets = async (req, res) => {
   }
 
   aggregationPipeline2.push({
-    $match: { "wastage_data.movement": { $in: ["551", "552"] } },
-  });
-
-  aggregationPipeline2.push({
-    $group: {
-      _id: {
-        outlet_code: "$wastage_data.outlet_code",
-        date: "$wastage_date",
-      },
-      dailyWastage: { $sum: "$wastage_data.amount" },
-    },
-  });
-
-  aggregationPipeline2.push({
-    $addFields: {
-      dailyWastage: { $abs: "$dailyWastage" },
-    },
-  });
-
-  aggregationPipeline2.push({
-    $project: {
-      _id: 0,
-      outlet_code: "$_id.outlet_code",
-      dailyWastage: "$dailyWastage",
-      _id: "$_id.date",
-      date: "$_id.date",
-    },
-  });
-
-  aggregationPipeline.push({ $sort: { date: 1 } });
-
-  try {
-    const salesData = await PNPInvoiceModel.aggregate(aggregationPipeline);
-    const wastageData = await WastageDailyModel.aggregate(aggregationPipeline2);
-
-    const combinedData = salesData.map((sales, index) => {
-      let wastageP = wastageData.find(
-        (item) =>
-          item.outlet_code === sales.outlet_code &&
-          item.date.toISOString().split("T")[0] ===
-            sales.date.toISOString().split("T")[0]
-      );
-      console.log({ wastageP });
-      return {
-        date: sales.date.toISOString().split("T")[0],
-        day: [
-          "Sunday",
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-        ][sales.day - 1],
-        dailySales: sales.dailySales,
-        outlet_code: sales.outlet_code,
-        dailyWastage: wastageP?.dailyWastage || 0,
-        dailySWPercentage:
-          (((wastageP?.dailyWastage || 0) / sales.dailySales) * 100).toFixed(
-            5
-          ) + "%",
-      };
-    });
-
-    // console.log({ combinedData });
-
-    const result = addCumulativeValuesByOutlet(combinedData);
-
-    res.status(200).json(result);
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).json({ error: "Failed to fetch data" });
-  }
-};
-const getSalesAndShrinkageDataByDateRangeOutlets = async (req, res) => {
-  const { startDate, endDate } = req.query;
-
-  const matchConditions = {
-    invoice_date: { $gte: new Date(startDate), $lte: new Date(endDate) },
-  };
-
-  const aggregationPipeline = [
-    { $match: matchConditions },
-    { $unwind: "$invoice_data" },
-  ];
-
-  if (req.user.role === "member") {
-    aggregationPipeline.push({
-      $match: { "invoice_data.outlet_code": req.user.outlet_code },
-    });
-  }
-
-  aggregationPipeline.push({
-    $group: {
-      _id: {
-        outlet_code: "$invoice_data.outlet_code",
-        date: "$invoice_date",
-      },
-      dailySales: { $sum: "$invoice_data.sales_tp" },
-      day: { $first: { $dayOfWeek: "$invoice_date" } },
-    },
-  });
-
-  aggregationPipeline.push({
-    $project: {
-      _id: 0,
-      outlet_code: "$_id.outlet_code",
-      dailySales: 1,
-      date: "$_id.date",
-      day: 1,
-    },
-  });
-
-  aggregationPipeline.push({ $sort: { date: 1 } });
-
-  const matchStage = {
-    wastage_date: { $gte: new Date(startDate), $lte: new Date(endDate) },
-  };
-
-  const aggregationPipeline2 = [
-    { $match: matchStage },
-    { $unwind: "$wastage_data" },
-  ];
-
-  if (req.user.role === "member") {
-    aggregationPipeline2.push({
-      $match: { "wastage_data.outlet_code": req.user.outlet_code },
-    });
-  }
-
-  aggregationPipeline2.push({
-    $match: { "wastage_data.movement": { $in: ["Z11", "Z12"] } },
+    $match: { "wastage_data.movement": { $in: movement } },
   });
 
   aggregationPipeline2.push({
@@ -761,7 +488,7 @@ const getSalesAndShrinkageDataByDateRangeOutlets = async (req, res) => {
 };
 
 const getSalesAndWastageDataByDateRangeCat = async (req, res) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate, movement } = req.query;
 
   const matchConditions = {
     invoice_date: { $gte: new Date(startDate), $lte: new Date(endDate) },
@@ -787,7 +514,7 @@ const getSalesAndWastageDataByDateRangeCat = async (req, res) => {
         date: "$invoice_date",
         cat: "$invoice_data.cat",
       },
-      dailySales: { $sum: "$invoice_data.sales_tp" },
+      dailySales: { $sum: "$invoice_data.nsi" },
       day: { $first: { $dayOfWeek: "$invoice_date" } },
     },
   });
@@ -821,7 +548,7 @@ const getSalesAndWastageDataByDateRangeCat = async (req, res) => {
   }
 
   aggregationPipeline2.push({
-    $match: { "wastage_data.movement": { $in: ["551", "552"] } },
+    $match: { "wastage_data.movement": { $in: movement } },
   });
 
   aggregationPipeline2.push({
@@ -901,149 +628,10 @@ const getSalesAndWastageDataByDateRangeCat = async (req, res) => {
   }
 };
 
-const getSalesAndShrinkageDataByDateRangeCat = async (req, res) => {
-  const { startDate, endDate } = req.query;
-
-  const matchConditions = {
-    invoice_date: { $gte: new Date(startDate), $lte: new Date(endDate) },
-  };
-
-  const aggregationPipeline = [
-    { $match: matchConditions },
-    { $unwind: "$invoice_data" },
-  ];
-
-  if (req.user.role === "member") {
-    aggregationPipeline.push({
-      $match: {
-        "invoice_data.outlet_code": req.user.outlet_code,
-      },
-    });
-  }
-
-  aggregationPipeline.push({
-    $group: {
-      _id: {
-        outlet_code: "$invoice_data.outlet_code",
-        date: "$invoice_date",
-        cat: "$invoice_data.cat",
-      },
-      dailySales: { $sum: "$invoice_data.sales_tp" },
-      day: { $first: { $dayOfWeek: "$invoice_date" } },
-    },
-  });
-
-  aggregationPipeline.push({
-    $project: {
-      _id: 0,
-      outlet_code: "$_id.outlet_code",
-      dailySales: 1,
-      date: "$_id.date",
-      cat: "$_id.cat",
-      day: 1,
-    },
-  });
-
-  aggregationPipeline.push({ $sort: { date: 1 } });
-
-  const matchStage = {
-    wastage_date: { $gte: new Date(startDate), $lte: new Date(endDate) },
-  };
-
-  const aggregationPipeline2 = [
-    { $match: matchStage },
-    { $unwind: "$wastage_data" },
-  ];
-
-  if (req.user.role === "member") {
-    aggregationPipeline2.push({
-      $match: { "wastage_data.outlet_code": req.user.outlet_code },
-    });
-  }
-
-  aggregationPipeline2.push({
-    $match: { "wastage_data.movement": { $in: ["551", "552"] } },
-  });
-
-  aggregationPipeline2.push({
-    $group: {
-      _id: {
-        outlet_code: "$wastage_data.outlet_code",
-        date: "$wastage_date",
-        cat: "$invoice_data.cat",
-      },
-      dailyWastage: { $sum: "$wastage_data.amount" },
-    },
-  });
-
-  aggregationPipeline2.push({
-    $addFields: {
-      dailyWastage: { $abs: "$dailyWastage" },
-    },
-  });
-
-  aggregationPipeline2.push({
-    $project: {
-      _id: 0,
-      outlet_code: "$_id.outlet_code",
-      dailyWastage: "$dailyWastage",
-      _id: "$_id.date",
-      date: "$_id.date",
-      cat: "$_id.cat",
-    },
-  });
-
-  aggregationPipeline.push({ $sort: { date: 1 } });
-
-  try {
-    const salesData = await PNPInvoiceModel.aggregate(aggregationPipeline);
-    console.log(salesData);
-    const wastageData = await WastageDailyModel.aggregate(aggregationPipeline2);
-
-    const combinedData = salesData.map((sales, index) => {
-      let wastageP = wastageData.find(
-        (item) =>
-          item.outlet_code === sales.outlet_code &&
-          item.date.toISOString().split("T")[0] ===
-            sales.date.toISOString().split("T")[0]
-      );
-      // console.log({ wastageP });
-      return {
-        date: sales.date.toISOString().split("T")[0],
-        day: [
-          "Sunday",
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-        ][sales.day - 1],
-        dailySales: sales.dailySales,
-        outlet_code: sales.outlet_code,
-        dailyWastage: wastageP?.dailyWastage || 0,
-        dailySWPercentage:
-          (((wastageP?.dailyWastage || 0) / sales.dailySales) * 100).toFixed(
-            5
-          ) + "%",
-        cat: sales.cat
-      };
-    });
-
-    // console.log({ combinedData });
-
-    const result = addCumulativeValuesByOutletAndCat(combinedData);
-
-    res.status(200).json(result);
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).json({ error: "Failed to fetch data" });
-  }
-};
-
-
 const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate, movement } = req.query;
+
+
 
   const matchConditions = {
     invoice_date: { $gte: new Date(startDate), $lte: new Date(endDate) },
@@ -1062,15 +650,17 @@ const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
     });
   }
 
+
+
   aggregationPipeline.push({
     $group: {
       _id: {
-        outlet_code: "$invoice_data.outlet_code",
         date: "$invoice_date",
+        outlet_code: "$invoice_data.outlet_code",
         cat: "$invoice_data.cat",
         article: "$invoice_data.article",
       },
-      dailySales: { $sum: "$invoice_data.sales_tp" },
+      dailySales: { $sum: "$invoice_data.nsi" },
       day: { $first: { $dayOfWeek: "$invoice_date" } },
     },
   });
@@ -1105,16 +695,16 @@ const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
   }
 
   aggregationPipeline2.push({
-    $match: { "wastage_data.movement": { $in: ["551", "552"] } },
+    $match: { "wastage_data.movement": { $in: movement } },
   });
 
   aggregationPipeline2.push({
     $group: {
       _id: {
-        outlet_code: "$wastage_data.outlet_code",
         date: "$wastage_date",
-        cat: "$invoice_data.cat",
-        article: "$invoice_data.article",
+        outlet_code: "$wastage_data.outlet_code",
+        cat: "$wastage_data.cat",
+        article: "$wastage_data.article",
       },
       dailyWastage: { $sum: "$wastage_data.amount" },
     },
@@ -1149,8 +739,9 @@ const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
       let wastageP = wastageData.find(
         (item) =>
           item.outlet_code === sales.outlet_code &&
+          item.article === sales.article &&
           item.date.toISOString().split("T")[0] ===
-            sales.date.toISOString().split("T")[0]
+          sales.date.toISOString().split("T")[0]
       );
       // console.log({ wastageP });
       return {
@@ -1170,7 +761,7 @@ const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
         dailySWPercentage:
           (((wastageP?.dailyWastage || 0) / sales.dailySales) * 100).toFixed(
             5
-          ) + "%",
+          ),
         cat: sales.cat,
         article: sales.article,
       };
@@ -1188,219 +779,7 @@ const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
 };
 
 
-const getSalesAndWastageDataBySingleDate = async (req, res) => {
-  const { startDate } = req.query;
 
-  const matchConditions = {
-    invoice_date: { $eq: new Date(startDate) },
-  };
-  const matchConditions2 = {
-    wastage_date: { $eq: new Date(startDate) },
-  };
-
-  const aggregationPipeline = [
-    { $match: matchConditions },
-    { $unwind: "$invoice_data" },
-  ];
-  const aggregationPipeline2 = [
-    { $match: matchConditions2 },
-    { $unwind: "$wastage_data" },
-  ];
-
-  aggregationPipeline2.push({
-    $match: { "wastage_data.movement": { $in: ["551", "552"] } },
-  });
-
-  // Add outlet_code match only if provided
-  if (req.user.role === "member") {
-    aggregationPipeline.push({
-      $match: { "invoice_data.outlet_code": req.user.outlet_code },
-    });
-    aggregationPipeline2.push({
-      $match: { "wastage_data.outlet_code": req.user.outlet_code },
-    });
-  }
-
-  // Group data by outlet_code and date, summing sales_tp to calculate value
-  aggregationPipeline.push({
-    $group: {
-      _id: "$invoice_data.outlet_code",
-      dailySales: { $sum: "$invoice_data.sales_tp" },
-    },
-  });
-
-  aggregationPipeline2.push({
-    $group: {
-      _id: "$wastage_data.outlet_code",
-      dailyWastage: { $sum: "$wastage_data.amount" },
-      outlet_name: {
-        $first: "$wastage_data.outlet_name",
-      },
-    },
-  });
-
-  // Project the final output format
-  aggregationPipeline.push({
-    $project: {
-      _id: 1,
-      // outlet_code: "$_id.outlet_code",
-      dailySales: 1,
-    },
-  });
-  // Project the final output format
-  aggregationPipeline2.push({
-    $project: {
-      _id: 1,
-      outlet_name: 1,
-      dailyWastage: 1,
-    },
-  });
-
-  try {
-    const salesData = await PNPInvoiceModel.aggregate(aggregationPipeline);
-
-    const wastageData = await WastageDailyModel.aggregate(aggregationPipeline2);
-
-    console.log(salesData);
-    console.log(wastageData);
-
-    const combinedData = salesData.map((sales, index) => ({
-      outlet_code: sales._id,
-      outlet_name: wastageData.find((item) => item._id === sales._id)
-        ? wastageData.find((item) => item._id === sales._id).outlet_name
-        : "N/A",
-      dailySales: sales.dailySales,
-      dailyWastage: wastageData.find((item) => item._id === sales._id)
-        ? Math.abs(
-            wastageData.find((item) => item._id === sales._id).dailyWastage
-          )
-        : 0,
-      dailySWPercentage: (
-        ((wastageData.find((item) => item._id === sales._id)
-          ? Math.abs(
-              wastageData.find((item) => item._id === sales._id).dailyWastage
-            )
-          : 0) /
-          sales.dailySales) *
-        100
-      ).toFixed(4),
-    }));
-
-    console.log(combinedData);
-
-    res.status(200).json(combinedData);
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).json({ error: "Failed to fetch data" });
-  }
-};
-
-const getSalesAndShrinkageDataBySingleDate = async (req, res) => {
-  const { startDate } = req.query;
-
-  const matchConditions = {
-    invoice_date: { $eq: new Date(startDate) },
-  };
-  const matchConditions2 = {
-    wastage_date: { $eq: new Date(startDate) },
-  };
-
-  const aggregationPipeline = [
-    { $match: matchConditions },
-    { $unwind: "$invoice_data" },
-  ];
-  const aggregationPipeline2 = [
-    { $match: matchConditions2 },
-    { $unwind: "$wastage_data" },
-  ];
-
-  aggregationPipeline2.push({
-    $match: { "wastage_data.movement": { $in: ["Z11", "Z12"] } },
-  });
-
-  // Add outlet_code match only if provided
-  if (req.user.role === "member") {
-    aggregationPipeline.push({
-      $match: { "invoice_data.outlet_code": req.user.outlet_code },
-    });
-    aggregationPipeline2.push({
-      $match: { "wastage_data.outlet_code": req.user.outlet_code },
-    });
-  }
-
-  // Group data by outlet_code and date, summing sales_tp to calculate value
-  aggregationPipeline.push({
-    $group: {
-      _id: "$invoice_data.outlet_code",
-      dailySales: { $sum: "$invoice_data.sales_tp" },
-    },
-  });
-
-  aggregationPipeline2.push({
-    $group: {
-      _id: "$wastage_data.outlet_code",
-      dailyWastage: { $sum: "$wastage_data.amount" },
-      outlet_name: {
-        $first: "$wastage_data.outlet_name",
-      },
-    },
-  });
-
-  // Project the final output format
-  aggregationPipeline.push({
-    $project: {
-      _id: 1,
-      // outlet_code: "$_id.outlet_code",
-      dailySales: 1,
-    },
-  });
-  // Project the final output format
-  aggregationPipeline2.push({
-    $project: {
-      _id: 1,
-      outlet_name: 1,
-      dailyWastage: 1,
-    },
-  });
-
-  try {
-    const salesData = await PNPInvoiceModel.aggregate(aggregationPipeline);
-
-    const wastageData = await WastageDailyModel.aggregate(aggregationPipeline2);
-
-    console.log(salesData);
-    console.log(wastageData);
-
-    const combinedData = salesData.map((sales, index) => ({
-      outlet_code: sales._id,
-      outlet_name: wastageData.find((item) => item._id === sales._id)
-        ? wastageData.find((item) => item._id === sales._id).outlet_name
-        : "N/A",
-      dailySales: sales.dailySales,
-      dailyWastage: wastageData.find((item) => item._id === sales._id)
-        ? Math.abs(
-            wastageData.find((item) => item._id === sales._id).dailyWastage
-          )
-        : 0,
-      dailySWPercentage: (
-        ((wastageData.find((item) => item._id === sales._id)
-          ? Math.abs(
-              wastageData.find((item) => item._id === sales._id).dailyWastage
-            )
-          : 0) /
-          sales.dailySales) *
-        100
-      ).toFixed(4),
-    }));
-
-    console.log(combinedData);
-
-    res.status(200).json(combinedData);
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).json({ error: "Failed to fetch data" });
-  }
-};
 
 module.exports = {
   createSalesData,
@@ -1409,15 +788,9 @@ module.exports = {
   deleteAllSalesData,
   createSalesAndWastageData,
   getSalesAndWastageDataByDateRange,
-  getSalesAndShrinkageDataByDateRange,
-  getSalesAndWastageDataBySingleDate,
-  getSalesAndShrinkageDataBySingleDate,
-
   getSalesAndWastageDataByDateRangeOutlets,
-  getSalesAndShrinkageDataByDateRangeOutlets,
 
   getSalesAndWastageDataByDateRangeCat,
-  getSalesAndShrinkageDataByDateRangeCat,
 
   getSalesAndWastageDataByDateRangeArticle
 };

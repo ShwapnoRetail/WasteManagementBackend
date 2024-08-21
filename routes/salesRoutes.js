@@ -6,16 +6,8 @@ const requireAuth = require("../middleware/requireAuth");
 const {
   createSalesAndWastageData,
   getSalesAndWastageDataByDateRange,
-  getSalesAndWastageDataBySingleDate,
-  getSalesAndShrinkageDataByDateRange,
-  getSalesAndShrinkageDataBySingleDate,
-
   getSalesAndWastageDataByDateRangeOutlets,
-  getSalesAndShrinkageDataByDateRangeOutlets,
-
   getSalesAndWastageDataByDateRangeCat,
-  getSalesAndShrinkageDataByDateRangeCat,
-
   getSalesAndWastageDataByDateRangeArticle
 } = require("../controllers/new_controllers/SalesDataController");
 
@@ -28,14 +20,10 @@ router.get("/sales-wastage-outlets", getSalesAndWastageDataByDateRangeOutlets);
 router.get("/sales-wastage-cat", getSalesAndWastageDataByDateRangeCat);
 router.get("/sales-wastage-articles", getSalesAndWastageDataByDateRangeArticle);
 
-router.get("/sales-shrinkage", getSalesAndShrinkageDataByDateRange);
-router.get("/sales-shrinkage-outlets", getSalesAndShrinkageDataByDateRangeOutlets);
-router.get("/sales-shrinkage-cat", getSalesAndShrinkageDataByDateRangeCat);
-router.get("/sales-shrinkage-article", getSalesAndShrinkageDataByDateRangeCat);
 
 
-router.get("/sales-wastage-by-date", getSalesAndWastageDataBySingleDate);
-router.get("/sales-shrinkage-by-date", getSalesAndShrinkageDataBySingleDate);
+
+
 
 // post  all
 router.post("/sales-wastage", createSalesAndWastageData);
