@@ -17,7 +17,7 @@ function addCumulativeValues(data) {
       ...item,
       cumulativeSales: cumulativeSales,
       cumulativeWastage: cumulativeWastage,
-      cumulativeSWPercentage: cumulativeSWPercentage.toFixed(5) + "%",
+      cumulativeSWPercentage: cumulativeSWPercentage.toFixed(2),
     };
   });
 }
@@ -47,9 +47,22 @@ function addCumulativeValuesByOutlet(data) {
       ...item,
       cumulativeSales: cumulativeData[outlet_code].cumulativeSales,
       cumulativeWastage: cumulativeData[outlet_code].cumulativeWastage,
-      cumulativeSWPercentage: cumulativeSWPercentage.toFixed(3) + "%",
+      cumulativeSWPercentage: cumulativeSWPercentage.toFixed(3),
     };
   });
+}
+
+function mergeAndRemoveDuplicates(array1, array2) {
+  // Combine outlet_code from both arrays
+  const combinedOutletCodes = [
+    ...array1.map((obj) => obj.outlet_code),
+    ...array2.map((obj) => obj.outlet_code),
+  ];
+
+  // Remove duplicates by converting the array to a Set and back to an array
+  const uniqueOutletCodes = [...new Set(combinedOutletCodes)];
+
+  return uniqueOutletCodes;
 }
 
 // function addCumulativeValuesByOutletAndCat(data) {
@@ -207,11 +220,8 @@ const createSalesAndWastageData = async (req, res) => {
   }
 };
 
-
-
 const getSalesAndWastageDataByDateRange = async (req, res) => {
   const { startDate, endDate, movement } = req.query;
-
 
   const matchConditions = {
     invoice_date: { $gte: new Date(startDate), $lte: new Date(endDate) },
@@ -230,7 +240,6 @@ const getSalesAndWastageDataByDateRange = async (req, res) => {
   }
 
   // dailySales: { $sum: "$value" },
-
 
   aggregationPipeline.push({
     $group: {
@@ -337,14 +346,14 @@ const getSalesAndWastageDataByDateRange = async (req, res) => {
         ][sales.day - 1],
         dailySales: sales.dailySales,
         dailyWastage: wastageP?.dailyWastage || 0,
-        dailySWPercentage:
-          (((wastageP?.dailyWastage || 0) / sales.dailySales) * 100).toFixed(
-            5
-          ) + "%",
+        dailySWPercentage: (
+          ((wastageP?.dailyWastage || 0) / sales.dailySales) *
+          100
+        ).toFixed(3),
       };
     });
 
-    // console.log({ combinedData });
+    console.log({ combinedData });
 
     const result = addCumulativeValues(combinedData);
 
@@ -469,10 +478,10 @@ const getSalesAndWastageDataByDateRangeOutlets = async (req, res) => {
         dailySales: sales.dailySales,
         outlet_code: sales.outlet_code,
         dailyWastage: wastageP?.dailyWastage || 0,
-        dailySWPercentage:
-          (((wastageP?.dailyWastage || 0) / sales.dailySales) * 100).toFixed(
-            5
-          ) + "%",
+        dailySWPercentage: (
+          ((wastageP?.dailyWastage || 0) / sales.dailySales) *
+          100
+        ).toFixed(5),
       };
     });
 
@@ -609,15 +618,13 @@ const getSalesAndWastageDataByDateRangeCat = async (req, res) => {
         dailySales: sales.dailySales,
         outlet_code: sales.outlet_code,
         dailyWastage: wastageP?.dailyWastage || 0,
-        dailySWPercentage:
-          (((wastageP?.dailyWastage || 0) / sales.dailySales) * 100).toFixed(
-            5
-          ) + "%",
-        cat: sales.cat
+        dailySWPercentage: (
+          ((wastageP?.dailyWastage || 0) / sales.dailySales) *
+          100
+        ).toFixed(3),
+        cat: sales.cat,
       };
     });
-
-    // console.log({ combinedData });
 
     // const result = addCumulativeValuesByOutletAndCat(combinedData);
 
@@ -630,8 +637,6 @@ const getSalesAndWastageDataByDateRangeCat = async (req, res) => {
 
 const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
   const { startDate, endDate, movement } = req.query;
-
-
 
   const matchConditions = {
     invoice_date: { $gte: new Date(startDate), $lte: new Date(endDate) },
@@ -649,8 +654,6 @@ const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
       },
     });
   }
-
-
 
   aggregationPipeline.push({
     $group: {
@@ -732,8 +735,12 @@ const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
 
   try {
     const salesData = await PNPInvoiceModel.aggregate(aggregationPipeline);
-    console.log(salesData);
+    // console.log(salesData);
     const wastageData = await WastageDailyModel.aggregate(aggregationPipeline2);
+
+    const sites = mergeAndRemoveDuplicates(salesData, wastageData);
+
+    // console.log(sites);
 
     const combinedData = salesData.map((sales, index) => {
       let wastageP = wastageData.find(
@@ -741,9 +748,8 @@ const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
           item.outlet_code === sales.outlet_code &&
           item.article === sales.article &&
           item.date.toISOString().split("T")[0] ===
-          sales.date.toISOString().split("T")[0]
+            sales.date.toISOString().split("T")[0]
       );
-      // console.log({ wastageP });
       return {
         date: sales.date.toISOString().split("T")[0],
         day: [
@@ -758,28 +764,66 @@ const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
         dailySales: sales.dailySales,
         outlet_code: sales.outlet_code,
         dailyWastage: wastageP?.dailyWastage || 0,
-        dailySWPercentage:
-          (((wastageP?.dailyWastage || 0) / sales.dailySales) * 100).toFixed(
-            5
-          ),
+        dailySWPercentage: isNaN(
+          (wastageP?.dailyWastage || 0) / sales.dailySales
+        )
+          ? 0
+          : (((wastageP?.dailyWastage || 0) / sales.dailySales) * 100).toFixed(
+              2
+            ),
         cat: sales.cat,
         article: sales.article,
       };
     });
 
-    // console.log({ combinedData });
+    // console.log(salesData.length);
+    // console.log(wastageData.length);
+
+    let noneSoldWastage = [];
+    const combinedDataWastage = wastageData.map((wastage, index) => {
+      let wastageP = salesData.find(
+        (item) =>
+          item.outlet_code === wastage.outlet_code &&
+          item.article === wastage.article &&
+          item.date.toISOString().split("T")[0] ===
+            wastage.date.toISOString().split("T")[0]
+      );
+
+      if (!wastageP) {
+        noneSoldWastage.push({
+          date: wastage.date.toISOString().split("T")[0],
+          dailySales: 0,
+          outlet_code: wastage.outlet_code,
+          dailyWastage: wastage?.dailyWastage,
+          dailySWPercentage: 0,
+          cat: wastage.cat,
+          article: wastage.article,
+        });
+      }
+
+      // console.log({ wastageP });
+      // return {
+      //   date: wastage.date.toISOString().split("T")[0],
+      //   dailySales: wastage.dailySales,
+      //   outlet_code: sales.outlet_code,
+      //   dailyWastage: wastageP?.dailyWastage || 0,
+      //   dailySWPercentage:
+      //     isNaN((wastageP?.dailyWastage || 0) / sales.dailySales)? 0 : (((wastageP?.dailyWastage || 0) / sales.dailySales) * 100).toFixed(2),
+      //   cat: sales.cat,
+      //   article: sales.article,
+      // };
+    });
+
+    console.log({ noneSoldWastage });
 
     // const result = addCumulativeValuesByOutletAndOutlet(combinedData);
 
-    res.status(200).json(combinedData);
+    res.status(200).json([...combinedData,...noneSoldWastage]);
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).json({ error: "Failed to fetch data" });
   }
 };
-
-
-
 
 module.exports = {
   createSalesData,
@@ -792,5 +836,5 @@ module.exports = {
 
   getSalesAndWastageDataByDateRangeCat,
 
-  getSalesAndWastageDataByDateRangeArticle
+  getSalesAndWastageDataByDateRangeArticle,
 };

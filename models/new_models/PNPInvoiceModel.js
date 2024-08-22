@@ -21,6 +21,10 @@ const PNPInvoiceSchema = new Schema(
           type: String,
           required: true,
         },
+        outlet_name: {
+          type: String,
+          default: "",
+        },
         article: {
           type: String,
           required: true,
