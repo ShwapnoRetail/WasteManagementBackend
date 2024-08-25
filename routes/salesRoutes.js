@@ -11,6 +11,11 @@ const {
   getSalesAndWastageDataByDateRangeArticle
 } = require("../controllers/new_controllers/SalesDataController");
 
+const {
+    getDashboardSalesAndWastageDataByDateRangeArticle
+} = require("../controllers/new_controllers/PNPDashboardController");
+
+
 // requireAuth for all routes
 router.use(requireAuth);
 
@@ -21,6 +26,8 @@ router.get("/sales-wastage-cat", getSalesAndWastageDataByDateRangeCat);
 router.get("/sales-wastage-articles", getSalesAndWastageDataByDateRangeArticle);
 
 
+// dashbarod
+router.get("/dashboard-articles", getDashboardSalesAndWastageDataByDateRangeArticle);
 
 
 
