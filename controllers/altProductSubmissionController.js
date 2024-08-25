@@ -22,6 +22,7 @@ const createAltProductsSub = async (req, res) => {
       discounter_price,
       outlet_name,
       outlet_code,
+      new_mrp,
     } = req.body;
     // console.log(data);
     // Insert the new bulk data
@@ -36,6 +37,7 @@ const createAltProductsSub = async (req, res) => {
       discounter_price,
       outlet_name,
       outlet_code,
+      new_mrp,
     });
 
     res.status(200).json({ message: "data submitted successfully" });

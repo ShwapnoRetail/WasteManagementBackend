@@ -5,7 +5,8 @@ const offerProductSchema = new mongoose.Schema({
 
   new_mrp: {    // new data
     type: String,
-    required: true
+    // required: true,
+    default: ""
   }, 
 
   reason: {   // new data

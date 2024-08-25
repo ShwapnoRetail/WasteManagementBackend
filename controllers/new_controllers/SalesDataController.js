@@ -768,9 +768,7 @@ const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
           (wastageP?.dailyWastage || 0) / sales.dailySales
         )
           ? 0
-          : (((wastageP?.dailyWastage || 0) / sales.dailySales) * 100).toFixed(
-              2
-            ),
+          : (((wastageP?.dailyWastage || 0) / sales.dailySales) * 100),
         cat: sales.cat,
         article: sales.article,
       };

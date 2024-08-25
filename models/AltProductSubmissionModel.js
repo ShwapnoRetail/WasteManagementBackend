@@ -9,6 +9,10 @@ const AltProductSubSchema = new mongoose.Schema(
     tp: { type: Number, required: true },
     quantity: { type: Number, required: true },
     margin: { type: Number, required: true },
+    new_mrp: {    
+      type: String,
+      default: ""
+    },
     discounter_price: {type: Number, required: true},
     outlet_name: {
       type: String,
