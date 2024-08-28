@@ -2,7 +2,7 @@
 // const WastageData = require("../../models/new_models/WastageDataModel");
 const PNPInvoiceModel = require("../../models/new_models/PNPInvoiceModel");
 const WastageDailyModel = require("../../models/new_models/WastageDailyModel");
-
+const AltProductModel = require("../../models/AltProductModel");
 
 
 const getDashboardSalesAndWastageDataByDateRangeArticle = async (req, res) => {
@@ -17,13 +17,13 @@ const getDashboardSalesAndWastageDataByDateRangeArticle = async (req, res) => {
       { $unwind: "$invoice_data" },
     ];
   
-    if (req.user.role === "member") {
-      aggregationPipeline.push({
-        $match: {
-          "invoice_data.outlet_code": req.user.outlet_code,
-        },
-      });
-    }
+    // if (req.user.role === "member") {
+    //   aggregationPipeline.push({
+    //     $match: {
+    //       "invoice_data.outlet_code": req.user.outlet_code,
+    //     },
+    //   });
+    // }
   
     aggregationPipeline.push({
       $group: {
@@ -61,11 +61,11 @@ const getDashboardSalesAndWastageDataByDateRangeArticle = async (req, res) => {
       { $unwind: "$wastage_data" },
     ];
   
-    if (req.user.role === "member") {
-      aggregationPipeline2.push({
-        $match: { "wastage_data.outlet_code": req.user.outlet_code },
-      });
-    }
+    // if (req.user.role === "member") {
+    //   aggregationPipeline2.push({
+    //     $match: { "wastage_data.outlet_code": req.user.outlet_code },
+    //   });
+    // }
   
     aggregationPipeline2.push({
       $match: { "wastage_data.movement": { $in: movement } },
@@ -111,6 +111,17 @@ const getDashboardSalesAndWastageDataByDateRangeArticle = async (req, res) => {
 
    
 
+    const allProducts = await AltProductModel.find();
+
+    // console.log(allProducts);
+
+
+    // console.log(allProducts);
+    salesData.map((item) => {
+      const productDetails = allProducts.find((product) => product.article === item.article);
+      // console.log(productDetails);
+      item.article_name = productDetails?productDetails.article_name : "N/A";
+    });
   
       const combinedData = salesData.map((sales, index) => {
         let wastageP = wastageData.find(
@@ -131,6 +142,7 @@ const getDashboardSalesAndWastageDataByDateRangeArticle = async (req, res) => {
             : (((wastageP?.dailyWastage || 0) / sales.dailySales) * 100),
           cat: sales.cat,
           article: sales.article,
+          article_name: sales.article_name,
         };
       });
 

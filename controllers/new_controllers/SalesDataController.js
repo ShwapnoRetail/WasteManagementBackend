@@ -2,6 +2,7 @@ const SalesData = require("../../models/new_models/SalesDataModel");
 const WastageData = require("../../models/new_models/WastageDataModel");
 const PNPInvoiceModel = require("../../models/new_models/PNPInvoiceModel");
 const WastageDailyModel = require("../../models/new_models/WastageDailyModel");
+const AltProductModel = require("../../models/AltProductModel");
 
 function addCumulativeValues(data) {
   let cumulativeSales = 0;
@@ -738,6 +739,16 @@ const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
     // console.log(salesData);
     const wastageData = await WastageDailyModel.aggregate(aggregationPipeline2);
 
+    const allProducts = await AltProductModel.find();
+    // console.log(allProducts);
+    salesData.map((item) => {
+      const productDetails = allProducts.find((product) => product.article === item.article);
+
+      // console.log(productDetails);
+      item.article_name = productDetails?productDetails.article_name : "N/A";
+    });
+
+
     const sites = mergeAndRemoveDuplicates(salesData, wastageData);
 
     // console.log(sites);
@@ -761,6 +772,7 @@ const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
           "Friday",
           "Saturday",
         ][sales.day - 1],
+        article_name: sales.article_name,
         dailySales: sales.dailySales,
         outlet_code: sales.outlet_code,
         dailyWastage: wastageP?.dailyWastage || 0,
