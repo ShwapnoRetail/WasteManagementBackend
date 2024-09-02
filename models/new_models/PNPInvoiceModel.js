@@ -31,7 +31,8 @@ const PNPInvoiceSchema = new Schema(
         },
         cat: {
           type: String,
-          required: true,
+          // required: true,
+          default: ""
         },
         sales_qty: {
           type: Number,
