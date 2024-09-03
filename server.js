@@ -18,7 +18,8 @@ const serviceRoutes = require("./routes/serviceRoutes");
 const app = express();
 
 // middleware
-app.use(express.json({ limit: "1000mb" }));
+app.use(express.json({ limit: '1000mb' }));
+app.use(express.urlencoded({ limit: '1000mb', extended: true }));
 app.use(cors());
 
 app.use((req, res, next) => {
