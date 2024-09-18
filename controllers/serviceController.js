@@ -7,6 +7,11 @@ const WastageDailyModel = require("../models/new_models/WastageDailyModel");
 const getInvoiceAndOfferProducts = async (req, res) => {
   const { startDate, endDate, outlet_code } = req.query;
 
+  console.log({startDate,endDate});
+
+  
+  console.log("hello");
+
   if (!startDate || !endDate) {
     return res
       .status(400)
@@ -20,12 +25,6 @@ const getInvoiceAndOfferProducts = async (req, res) => {
     },
   };
 
-  // if(req.user.role === "member"){
-  //   matchConditions.outlet_code = outlet_code
-  // }
-
-  // console.log(req.user);
-  // console.log(matchConditions);
 
 
   const start = new Date(startDate);
@@ -34,9 +33,7 @@ const getInvoiceAndOfferProducts = async (req, res) => {
   const end = new Date(endDate);
   end.setUTCHours(23, 59, 59, 999);
 
-  // if (outlet_code) {
-  //   matchConditions["InvData.outlet_code"] = outlet_code;
-  // }
+
 
   try {
     const invoices = await PNPInvoiceModel.aggregate([
@@ -50,6 +47,9 @@ const getInvoiceAndOfferProducts = async (req, res) => {
         },
       },
     ]);
+
+
+    // console.log({invoices});
 
     // console.log(start.toISOString(), end.toISOString());
 
@@ -67,6 +67,8 @@ const getInvoiceAndOfferProducts = async (req, res) => {
       },
     ]);
 
+    // console.log({appSalesData});
+
     let flatInvoiceData = [];
 
     invoices.map((item) => flatInvoiceData.push(item.invoice_data));
@@ -81,8 +83,8 @@ const getInvoiceAndOfferProducts = async (req, res) => {
         return (
           mergedItem.article === item.article &&
           mergedItem.outlet_code === item.outlet_code &&
-          mergedItem.sales_tp === item.sales_tp &&
-          new Date(mergedItem.invoice_date).toDateString() === new Date(item.invoice_date).toDateString()
+          mergedItem.sales_tp === item.sales_tp 
+          // new Date(mergedItem.invoice_date).toDateString() === new Date(item.invoice_date).toDateString()
         );
       });
 
@@ -105,80 +107,7 @@ const getInvoiceAndOfferProducts = async (req, res) => {
 };
 
 
-const getWastageProductsSummed_Old = async (req, res) => {
 
-  const { isNational } = req.query;
-
-  let groupingData = {
-  }
-
-  // console.log(typeof isNational);
-
-  if(isNational === "true"){
-    console.log("in if");
-    groupingData = {
-      description: "$description",
-      cat: "$cat",
-      article: "$article"
-    }
-  }else{
-    console.log("in else");
-    groupingData = {
-      outlet_code : "$outlet_code",
-      // description: "$description",
-      // cat: "$cat",
-      // article: "$article"
-    }
-  }
-
-  // console.log(isNational, groupingData);
-
-  try {
-    const wastageProduct = await wastageProductModel.aggregate([
-     
-      {
-        $group: {
-          _id: groupingData,
-          total_sales_amount: { $sum: { $toDouble: "$sales_amount" } },
-          total_wastage_amount: { $sum: { $toDouble: "$wastage_amount" } }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          article: "$_id.article",
-          description: "$_id.description",
-          cat: "$_id.cat",
-          outlet_code: "$_id.outlet_code",
-          total_sales_amount: 1,
-          total_wastage_amount: 1,
-          total_wastage_percentage: {
-            $cond: {
-              if: { $eq: ["$total_sales_amount", 0] },
-              then: 0,
-              else: {
-                $multiply: [
-                  { $divide: ["$total_wastage_amount", "$total_sales_amount"] },
-                  100
-                ]
-              }
-            }
-          }
-        }
-      }
-
-
-    ]);
-
-    
-
-    res.status(200).json(wastageProduct);
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).json({ error: "Failed to fetch data" });
-  }
-
-};
 
 const getWastageProductsSummed = async (req, res) => {
 

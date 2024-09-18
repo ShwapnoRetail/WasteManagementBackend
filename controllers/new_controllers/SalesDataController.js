@@ -749,7 +749,7 @@ const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
     });
 
 
-    const sites = mergeAndRemoveDuplicates(salesData, wastageData);
+    // const sites = mergeAndRemoveDuplicates(salesData, wastageData);
 
     // console.log(sites);
 
@@ -824,7 +824,7 @@ const getSalesAndWastageDataByDateRangeArticle = async (req, res) => {
       // };
     });
 
-    console.log({ noneSoldWastage });
+    // console.log({ noneSoldWastage });
 
     // const result = addCumulativeValuesByOutletAndOutlet(combinedData);
 

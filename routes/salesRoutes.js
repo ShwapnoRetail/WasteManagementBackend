@@ -12,7 +12,8 @@ const {
 } = require("../controllers/new_controllers/SalesDataController");
 
 const {
-    getDashboardSalesAndWastageDataByDateRangeArticle
+    getDashboardSalesAndWastageDataByDateRangeArticle,
+    streamLargeDataset
 } = require("../controllers/new_controllers/PNPDashboardController");
 
 
@@ -28,6 +29,7 @@ router.get("/sales-wastage-articles", getSalesAndWastageDataByDateRangeArticle);
 
 // dashbarod
 router.get("/dashboard-articles", getDashboardSalesAndWastageDataByDateRangeArticle);
+router.get("/test", streamLargeDataset);
 
 
 
