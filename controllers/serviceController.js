@@ -1,6 +1,7 @@
 const PNPInvoiceModel = require("../models/new_models/PNPInvoiceModel");
 const wastageProductModel = require("../models/WastageProductModel");
 const ProductOfferModel = require("../models/ProductOfferModel");
+const AltProductSub = require("../models/AltProductSubmissionModel");
 
 const WastageDailyModel = require("../models/new_models/WastageDailyModel");
 
@@ -255,7 +256,278 @@ const getWastageProductsSummed = async (req, res) => {
 
 };
 
+
+// API to fetch and group data by outlet_name using aggregation
+const getDateWiseSubmissions = async (req, res) => {
+  try {
+    const { date } = req.query;
+    console.log(date);
+    // Validate date input
+    if (!date) {
+      return res.status(400).json({ message: 'Date is required' });
+    }
+
+    // Define the date range
+    const startOfDay = new Date(`${date}T00:00:00Z`);
+    const endOfDay = new Date(`${date}T23:59:59Z`);
+
+    // Aggregation for AltProductSub (cash entry type)
+    const altProductSubAggregation = AltProductSub.aggregate([
+      {
+        $match: {
+          updatedAt: {
+            $gte: startOfDay,
+            $lte: endOfDay,
+          }
+        }
+      },
+      {
+        $group: {
+          _id: "$outlet_code", // Group by outlet_code
+          totalSales: { $sum: { $multiply: ['$quantity', '$discounter_price'] } },
+          outlet_name: { $first: '$outlet_name' }
+        }
+      },
+      {
+        $addFields: {
+          type: "cash entry",
+        }
+      },
+      {
+        $project: {
+          _id: 0, // Remove _id from the output
+          outlet_code: "$_id", // Rename _id to outlet_code
+          outlet_name: 1,
+          totalSales: 1,
+          type: 1
+        }
+      }
+    ]);
+    const altProductSubAggregationArticles = AltProductSub.aggregate([
+      {
+        $match: {
+          updatedAt: {
+            $gte: startOfDay,
+            $lte: endOfDay,
+          }
+        }
+      },
+      {
+        $addFields: {
+          type: "cash entry",
+        }
+      },
+      {
+        $project: {
+          min_mrp: "$discounter_price", // Rename a field
+          outlet_code: 1,
+          outlet_name: 1,
+          article: 1,
+          article_name: 1,
+          quantity: 1,
+          // createdAt: 1,
+          type: 1,
+          _id: 0
+        }
+      }
+    ]);
+
+    // Aggregation for OfferProduct (regular type)
+    const offerProductAggregation = ProductOfferModel.aggregate([
+      {
+        $match: {
+          created_at: {
+            $gte: startOfDay,
+            $lte: endOfDay,
+          }
+        }
+      },
+      {
+        $group: {
+          _id: "$outlet_code", // Group by outlet_code
+          totalSales: { $sum: { $multiply: ['$so_quantity', '$min_mrp'] } },
+          outlet_name: { $first: '$outlet_name' }
+        }
+      },
+      {
+        $addFields: {
+          type: "regular"
+        }
+      },
+      {
+        $project: {
+          _id: 0, // Remove _id from the output
+          outlet_code: "$_id", // Rename _id to outlet_code
+          outlet_name: 1,
+          totalSales: 1,
+          type: 1
+        }
+      }
+    ]);
+    const offerProductAggregationArticles = ProductOfferModel.aggregate([
+      {
+        $match: {
+          created_at: {
+            $gte: startOfDay,
+            $lte: endOfDay,
+          }
+        }
+      },
+      {
+        $addFields: {
+          type: "regular"
+        }
+      },
+      {
+        $project: {
+          min_mrp: 1, // Rename a field
+          quantity: "$so_quantity",
+          outlet_code: 1,
+          outlet_name: 1,
+          article: 1,
+          article_name: 1,
+          // createdAt: 1,
+          type: 1,
+          _id: 0
+        }
+      }
+    ]);
+
+    // Execute both aggregations in parallel
+    const [altProducts, offerProducts] = await Promise.all([
+      altProductSubAggregation,
+      offerProductAggregation
+    ]);
+    const [altProductsArticles, offerProductsArticles] = await Promise.all([
+      altProductSubAggregationArticles,
+      offerProductAggregationArticles
+    ]);
+
+    // Combine the results
+    const combinedResults = [...altProducts, ...offerProducts];
+
+    // Create a Set to track unique outlet codes
+    const uniqueOutletCodes = new Set(combinedResults.map(item => item.outlet_code));
+
+    // Calculate total sales for the day
+    const totalSalesForDay = combinedResults.reduce((total, item) => total + item.totalSales, 0);
+
+    // Send the response with data, total outlets, and total sales for the day
+    res.json({
+      status: true,
+      totalOutlets: uniqueOutletCodes.size,  // Total unique outlets
+      totalSales: totalSalesForDay,          // Total sales for the day
+      data: combinedResults,
+      articleData: [...altProductsArticles, ...offerProductsArticles]   // Combined sales data
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+const getDateWiseSubmissionsOutlet = async (req, res) => {
+  try {
+    const { date, outlet_code } = req.query;
+    // Validate date input
+    if (!date) {
+      return res.status(400).json({ message: 'Date is required' });
+    }
+    
+    // Define the date range
+    const startOfDay = new Date(`${date}T00:00:00Z`);
+    const endOfDay = new Date(`${date}T23:59:59Z`);
+    
+    console.log(startOfDay,endOfDay,outlet_code.length);
+
+
+    const altProductSubAggregationArticles = AltProductSub.aggregate([
+      {
+        $match: {
+          updatedAt: {
+            $gte: startOfDay,
+            $lte: endOfDay,
+          },
+         
+        }
+      },
+      {
+        $addFields: {
+          type: "cash entry",
+        }
+      },
+      {
+        $project: {
+          min_mrp: "$discounter_price", // Rename a field
+          outlet_code: 1,
+          outlet_name: 1,
+          article: 1,
+          article_name: 1,
+          quantity: 1,
+          // createdAt: 1,
+          type: 1,
+          _id: 0
+        }
+      }
+    ]);
+
+
+    const offerProductAggregationArticles = ProductOfferModel.aggregate([
+      {
+        $match: {
+          created_at: {
+            $gte: startOfDay,
+            $lte: endOfDay,
+          },
+         
+        }
+      },
+      {
+        $addFields: {
+          type: "regular"
+        }
+      },
+      {
+        $project: {
+          min_mrp: 1, // Rename a field
+          quantity: "$so_quantity",
+          outlet_code: 1,
+          outlet_name: 1,
+          article: 1,
+          article_name: 1,
+          // createdAt: 1,
+          type: 1,
+          _id: 0
+        }
+      }
+    ]);
+
+    const [altProductsArticles, offerProductsArticles] = await Promise.all([
+      altProductSubAggregationArticles,
+      offerProductAggregationArticles
+    ]);
+
+    const combinedData = [...altProductsArticles, ...offerProductsArticles]
+
+    outletData = combinedData.filter(item => item.outlet_code.trim() === outlet_code.trim())
+
+
+
+    res.json({
+      status: true,
+      data: outletData   // Combined sales data
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 module.exports = {
   getInvoiceAndOfferProducts,
-  getWastageProductsSummed
+  getWastageProductsSummed,
+  getDateWiseSubmissions,
+  getDateWiseSubmissionsOutlet
 };

@@ -53,73 +53,7 @@ function addCumulativeValuesByOutlet(data) {
   });
 }
 
-function mergeAndRemoveDuplicates(array1, array2) {
-  // Combine outlet_code from both arrays
-  const combinedOutletCodes = [
-    ...array1.map((obj) => obj.outlet_code),
-    ...array2.map((obj) => obj.outlet_code),
-  ];
 
-  // Remove duplicates by converting the array to a Set and back to an array
-  const uniqueOutletCodes = [...new Set(combinedOutletCodes)];
-
-  return uniqueOutletCodes;
-}
-
-// function addCumulativeValuesByOutletAndCat(data) {
-//   const cumulativeData = {};
-
-//   return data.map(item => {
-//       const { outlet_code, cat, dailySales, dailyWastage } = item;
-//       const key = `${outlet_code}_${cat}`;
-
-//       if (!cumulativeData[key]) {
-//           cumulativeData[key] = {
-//               cumulativeSales: 0,
-//               cumulativeWastage: 0
-//           };
-//       }
-
-//       cumulativeData[key].cumulativeSales += dailySales;
-//       cumulativeData[key].cumulativeWastage += dailyWastage;
-
-//       const cumulativeSWPercentage = (cumulativeData[key].cumulativeWastage / cumulativeData[key].cumulativeSales) * 100;
-
-//       return {
-//           ...item,
-//           cumulativeSales: cumulativeData[key].cumulativeSales,
-//           cumulativeWastage: cumulativeData[key].cumulativeWastage,
-//           cumulativeSWPercentage: cumulativeSWPercentage.toFixed(5) + "%"
-//       };
-//   });
-// }
-// function addCumulativeValuesByOutletAndOutlet(data) {
-//   const cumulativeData = {};
-
-//   return data.map(item => {
-//       const { outlet_code, article, dailySales, dailyWastage } = item;
-//       const key = `${outlet_code}_${article}`;
-
-//       if (!cumulativeData[key]) {
-//           cumulativeData[key] = {
-//               cumulativeSales: 0,
-//               cumulativeWastage: 0
-//           };
-//       }
-
-//       cumulativeData[key].cumulativeSales += dailySales;
-//       cumulativeData[key].cumulativeWastage += dailyWastage;
-
-//       const cumulativeSWPercentage = (cumulativeData[key].cumulativeWastage / cumulativeData[key].cumulativeSales) * 100;
-
-//       return {
-//           ...item,
-//           cumulativeSales: cumulativeData[key].cumulativeSales,
-//           cumulativeWastage: cumulativeData[key].cumulativeWastage,
-//           cumulativeSWPercentage: cumulativeSWPercentage.toFixed(5) + "%"
-//       };
-//   });
-// }
 
 const createSalesData = async (req, res) => {
   try {
