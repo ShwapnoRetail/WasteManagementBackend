@@ -325,6 +325,7 @@ const getDateWiseSubmissions = async (req, res) => {
           article: 1,
           article_name: 1,
           quantity: 1,
+          new_mrp: 1,
           // createdAt: 1,
           type: 1,
           _id: 0
@@ -386,6 +387,7 @@ const getDateWiseSubmissions = async (req, res) => {
           outlet_name: 1,
           article: 1,
           article_name: 1,
+          new_mrp: 1,
           // createdAt: 1,
           type: 1,
           _id: 0
