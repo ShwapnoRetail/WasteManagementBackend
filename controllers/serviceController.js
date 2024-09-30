@@ -328,7 +328,12 @@ const getDateWiseSubmissions = async (req, res) => {
           article_name: 1,
           quantity: 1,
           new_mrp: 1,
-          // createdAt: 1,
+          createdAt: {
+            $dateToString: {
+              format: "%Y-%m-%d", // Customize the format if needed
+              date: "$createdAt"
+            }
+          },
           type: 1,
           _id: 0
         }
@@ -390,7 +395,12 @@ const getDateWiseSubmissions = async (req, res) => {
           article: 1,
           article_name: 1,
           new_mrp: 1,
-          // createdAt: 1,
+          createdAt: {
+            $dateToString: {
+              format: "%Y-%m-%d", // Customize the format as needed
+              date: "$created_at"
+            }
+          },
           type: 1,
           _id: 0
         }
@@ -406,6 +416,9 @@ const getDateWiseSubmissions = async (req, res) => {
       altProductSubAggregationArticles,
       offerProductAggregationArticles
     ]);
+
+
+    // console.log(offerProductsArticles.slice(0,5));
 
     // Combine the results
     const combinedResults = [...altProducts, ...offerProducts];
