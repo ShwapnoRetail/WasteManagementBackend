@@ -260,7 +260,9 @@ const getWastageProductsSummed = async (req, res) => {
 // API to fetch and group data by outlet_name using aggregation
 const getDateWiseSubmissions = async (req, res) => {
   try {
-    const { date } = req.query;
+    const { date,endDate } = req.query;
+
+    console.log({date,endDate});
     console.log(date);
     // Validate date input
     if (!date) {
@@ -269,7 +271,7 @@ const getDateWiseSubmissions = async (req, res) => {
 
     // Define the date range
     const startOfDay = new Date(`${date}T00:00:00Z`);
-    const endOfDay = new Date(`${date}T23:59:59Z`);
+    const endOfDay = new Date(`${endDate?endDate:date}T23:59:59Z`);
 
     // Aggregation for AltProductSub (cash entry type)
     const altProductSubAggregation = AltProductSub.aggregate([
@@ -431,7 +433,7 @@ const getDateWiseSubmissions = async (req, res) => {
 
 const getDateWiseSubmissionsOutlet = async (req, res) => {
   try {
-    const { date, outlet_code } = req.query;
+    const { date, endDate, outlet_code } = req.query;
     // Validate date input
     if (!date) {
       return res.status(400).json({ message: 'Date is required' });
@@ -439,7 +441,7 @@ const getDateWiseSubmissionsOutlet = async (req, res) => {
     
     // Define the date range
     const startOfDay = new Date(`${date}T00:00:00Z`);
-    const endOfDay = new Date(`${date}T23:59:59Z`);
+    const endOfDay = new Date(`${endDate?endDate:date}T23:59:59Z`);
     
     console.log(startOfDay,endOfDay,outlet_code.length);
 
