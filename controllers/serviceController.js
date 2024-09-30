@@ -329,10 +329,10 @@ const getDateWiseSubmissions = async (req, res) => {
           quantity: 1,
           new_mrp: 1,
           createdAt: {
-            $dateToString: {
-              format: "%Y-%m-%d", // Customize the format if needed
-              date: "$createdAt"
-            }
+            $concat: [
+              { $dateToString: { format: "%d-%m-", date: "$createdAt" } }, // Day and month
+              { $substr: [{ $dateToString: { format: "%Y", date: "$createdAt" } }, 2, 2] } // Last two digits of the year
+            ]
           },
           type: 1,
           _id: 0
@@ -396,10 +396,10 @@ const getDateWiseSubmissions = async (req, res) => {
           article_name: 1,
           new_mrp: 1,
           createdAt: {
-            $dateToString: {
-              format: "%Y-%m-%d", // Customize the format as needed
-              date: "$created_at"
-            }
+            $concat: [
+              { $dateToString: { format: "%d-%m-", date: "$created_at" } }, // Day and month
+              { $substr: [{ $dateToString: { format: "%Y", date: "$created_at" } }, 2, 2] } // Last two digits of the year
+            ]
           },
           type: 1,
           _id: 0
